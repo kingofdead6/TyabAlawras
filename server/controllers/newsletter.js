@@ -1,4 +1,4 @@
-import Newsletter from '../models/Newsletter.js';
+import Newsletter from '../models/NewsLetter.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import validator from 'validator';
 import nodemailer from 'nodemailer';
