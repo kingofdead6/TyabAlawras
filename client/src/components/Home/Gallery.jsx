@@ -1,38 +1,16 @@
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
-const images = [
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-  "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1754160031/SpeakersBack_wtwc8q.jpg",
-];
+import axios from "axios";
+import { API_BASE_URL } from "../../../api";
 
 export default function Gallery() {
   const sliderRef = useRef(null);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const settings = {
     dots: false,
@@ -54,18 +32,36 @@ export default function Gallery() {
     ],
   };
 
+  useEffect(() => {
+    fetchGalleryImages();
+  }, []);
+
+  const fetchGalleryImages = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.get(`${API_BASE_URL}/gallery`);
+      setGalleryImages(response.data.map((item) => item.image) || []);
+    } catch (err) {
+      console.error('Fetch gallery images error:', err);
+      setError(err.response?.data?.message || "⚠️ خطأ في جلب الصور");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderSlides = () => {
     const slides = [];
-    for (let i = 0; i < images.length; ) {
+    for (let i = 0; i < galleryImages.length; ) {
       // Big image
-      if (i < images.length) {
+      if (i < galleryImages.length) {
         slides.push(
           <div
             key={`big-${i}`}
             className="inline-block w-[400px] h-[300px] px-[2px]"
           >
             <img
-              src={images[i]}
+              src={galleryImages[i]}
               alt="Large"
               draggable={false}
               onClick={(e) => e.preventDefault()}
@@ -76,22 +72,22 @@ export default function Gallery() {
         i++;
       }
       // Two stacked smaller images
-      if (i < images.length) {
+      if (i < galleryImages.length) {
         slides.push(
           <div
             key={`small-${i}`}
             className="w-[200px] h-[300px] px-[2px] flex flex-col justify-between"
           >
             <img
-              src={images[i]}
+              src={galleryImages[i]}
               alt="Small 1"
               draggable={false}
               onClick={(e) => e.preventDefault()}
               className="w-full h-[48%] object-cover rounded-xl shadow-md mb-2 pointer-events-none select-none"
             />
-            {images[i + 1] && (
+            {galleryImages[i + 1] && (
               <img
-                src={images[i + 1]}
+                src={galleryImages[i + 1]}
                 alt="Small 2"
                 draggable={false}
                 onClick={(e) => e.preventDefault()}
@@ -107,7 +103,7 @@ export default function Gallery() {
   };
 
   return (
-    <section id="gallery" className="py-16 relative">
+    <section id="gallery" className="py-16 relative" dir="rtl">
       <div className="container mx-auto text-center">
         <motion.h2
           initial={{ y: -30, opacity: 0 }}
@@ -118,11 +114,19 @@ export default function Gallery() {
           المعرض
         </motion.h2>
 
-        <div className="relative max-w-9xl mx-auto">
-          <Slider ref={sliderRef} {...settings}>
-            {renderSlides()}
-          </Slider>
-        </div>
+        {error && <p className="text-red-400 text-center mb-6 font-medium">{error}</p>}
+
+        {loading ? (
+          <p className="text-center text-gray-400 mt-10">جارٍ التحميل...</p>
+        ) : galleryImages.length > 0 ? (
+          <div className="relative max-w-9xl mx-auto">
+            <Slider ref={sliderRef} {...settings}>
+              {renderSlides()}
+            </Slider>
+          </div>
+        ) : (
+          <p className="text-center text-gray-400 mt-10">لا توجد صور في المعرض</p>
+        )}
       </div>
     </section>
   );

@@ -1,60 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
-const dishes = [
-  { name: "كسكس الأوراسي", price: "1200 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "شوربة فريك", price: "500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "شوربات" },
-  { name: "طاجين لحم", price: "1500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "سلطة مشوية", price: "700 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "مقبلات" },
-  { name: "بسطيلة", price: "1300 دج", image: "/images/bastila.jpg", type: "أطباق رئيسية" },
-  { name: "حريرة", price: "600 دج", image: "/images/harira.jpg", type: "شوربات" },
-  { name: "محاجب", price: "300 دج", image: "/images/mhadjeb.jpg", type: "مقبلات" },
-  { name: "بريوش", price: "250 دج", image: "/images/brioche.jpg", type: "حلويات" },
-  { name: "بسبوسة", price: "400 دج", image: "/images/basbousa.jpg", type: "حلويات" },
-  { name: "شاي بالنعناع", price: "200 دج", image: "/images/tea.jpg", type: "مشروبات" },
-  { name: "كسكس الأوراسي", price: "1200 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "شوربة فريك", price: "500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "شوربات" },
-  { name: "طاجين لحم", price: "1500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "سلطة مشوية", price: "700 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "مقبلات" },
-  { name: "بسطيلة", price: "1300 دج", image: "/images/bastila.jpg", type: "أطباق رئيسية" },
-  { name: "حريرة", price: "600 دج", image: "/images/harira.jpg", type: "شوربات" },
-  { name: "محاجب", price: "300 دج", image: "/images/mhadjeb.jpg", type: "مقبلات" },
-  { name: "بريوش", price: "250 دج", image: "/images/brioche.jpg", type: "حلويات" },
-  { name: "بسبوسة", price: "400 دج", image: "/images/basbousa.jpg", type: "حلويات" },
-  { name: "شاي بالنعناع", price: "200 دج", image: "/images/tea.jpg", type: "مشروبات" },
-  { name: "كسكس الأوراسي", price: "1200 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "شوربة فريك", price: "500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "شوربات" },
-  { name: "طاجين لحم", price: "1500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "سلطة مشوية", price: "700 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "مقبلات" },
-  { name: "بسطيلة", price: "1300 دج", image: "/images/bastila.jpg", type: "أطباق رئيسية" },
-  { name: "حريرة", price: "600 دج", image: "/images/harira.jpg", type: "شوربات" },
-  { name: "محاجب", price: "300 دج", image: "/images/mhadjeb.jpg", type: "مقبلات" },
-  { name: "بريوش", price: "250 دج", image: "/images/brioche.jpg", type: "حلويات" },
-  { name: "بسبوسة", price: "400 دج", image: "/images/basbousa.jpg", type: "حلويات" },
-  { name: "شاي بالنعناع", price: "200 دج", image: "/images/tea.jpg", type: "مشروبات" },
-  { name: "كسكس الأوراسي", price: "1200 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "شوربة فريك", price: "500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "شوربات" },
-  { name: "طاجين لحم", price: "1500 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "أطباق رئيسية" },
-  { name: "سلطة مشوية", price: "700 دج", image: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756898714/8593e92b-d20e-4d76-a64c-1ed0fed6469f_as4r7z.jpg", type: "مقبلات" },
-  { name: "بسطيلة", price: "1300 دج", image: "/images/bastila.jpg", type: "أطباق رئيسية" },
-  { name: "حريرة", price: "600 دج", image: "/images/harira.jpg", type: "شوربات" },
-  { name: "محاجب", price: "300 دج", image: "/images/mhadjeb.jpg", type: "مقبلات" },
-  { name: "بريوش", price: "250 دج", image: "/images/brioche.jpg", type: "حلويات" },
-  { name: "بسبوسة", price: "400 دج", image: "/images/basbousa.jpg", type: "حلويات" },
-  { name: "شاي بالنعناع", price: "200 دج", image: "/images/tea.jpg", type: "مشروبات" },
-  
-];
+import axios from "axios";
+import { FaSearch } from "react-icons/fa";
+import { API_BASE_URL } from "../../../api";
 
 export default function Menu() {
+  const [menuItems, setMenuItems] = useState([]);
   const [visible, setVisible] = useState(12);
   const [selectedType, setSelectedType] = useState("الكل");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const types = ["الكل", ...new Set(dishes.map((dish) => dish.type))];
+  // Extract unique types dynamically
+  const types = ["الكل", ...new Set(menuItems.map((item) => item.type))];
 
-  const filteredDishes =
-    selectedType === "الكل"
-      ? dishes
-      : dishes.filter((dish) => dish.type === selectedType);
+  // Filter menu items by search term and selected type
+  const filteredMenuItems = menuItems.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === "الكل" || item.type === selectedType;
+    return matchesSearch && matchesType;
+  });
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
+
+  const fetchMenuItems = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.get(`${API_BASE_URL}/menu`);
+      setMenuItems(response.data || []);
+    } catch (err) {
+      console.error('Fetch menu items error:', err);
+      setError(err.response?.data?.message || "⚠️ خطأ في جلب عناصر القائمة");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section id="menu" className="py-16">
@@ -64,47 +48,55 @@ export default function Menu() {
           القائمة
         </h2>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {types.map((type, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setSelectedType(type);
-                setVisible(12); // reset to 9 when changing type
-              }}
-              className={`cursor-pointer px-4 py-2 rounded-full border transition ${
-                selectedType === type
-                  ? "bg-yellow-400 text-black font-semibold"
-                  : "bg-transparent text-yellow-300 border-yellow-400 hover:bg-yellow-500 hover:text-black"
-              }`}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
+        {error && <p className="text-red-400 text-center mb-6 font-medium">{error}</p>}
+
+          
+          <div className="flex flex-wrap justify-center gap-3 my-10">
+            {types.map((type, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setSelectedType(type);
+                  setVisible(12); // Reset to 12 when changing type
+                }}
+                className={`cursor-pointer px-4 py-2 rounded-full border transition ${
+                  selectedType === type
+                    ? "bg-yellow-400 text-black font-semibold"
+                    : "bg-transparent text-yellow-300 border-yellow-400 hover:bg-yellow-500 hover:text-black"
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
 
         {/* Menu Items */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {filteredDishes.slice(0, visible).map((dish, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.05 }}
-              className="bg-black/40 backdrop-blur-md border border-gray-700 rounded-2xl shadow-lg p-4 flex flex-col items-center text-white"
-            >
-              <img
-                src={dish.image}
-                alt={dish.name}
-                className="w-60 h-40 object-cover rounded-xl mb-3"
-              />
-              <h3 className="text-lg font-semibold">{dish.name}</h3>
-              <p className="text-yellow-400 mt-1">{dish.price}</p>
-            </motion.div>
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-center text-gray-400 mt-10">جارٍ التحميل...</p>
+        ) : filteredMenuItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {filteredMenuItems.slice(0, visible).map((item, i) => (
+              <motion.div
+                key={item._id}
+                whileHover={{ scale: 1.05 }}
+                className="bg-black/40 backdrop-blur-md border border-gray-700 rounded-2xl shadow-red-500 shadow-lg p-4 flex flex-col items-center text-white"
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-60 h-40 object-cover rounded-xl mb-3"
+                />
+                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <p className="text-yellow-400 mt-1">{item.price} د.ج</p>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-400 mt-10">لا توجد عناصر في القائمة</p>
+        )}
 
         {/* Show More Button */}
-        {visible < filteredDishes.length && (
+        {visible < filteredMenuItems.length && (
           <div className="mt-8">
             <button
               onClick={() => setVisible((prev) => prev + 9)}

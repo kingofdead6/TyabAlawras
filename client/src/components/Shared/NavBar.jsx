@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userType, setUserType] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,9 +18,22 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserType(decoded.usertype);
+      } catch (error) {
+        setUserType(null);
+      }
+    } else {
+      setUserType(null);
+    }
+  }, []);
+
   const handleScrollTo = (id) => {
     setMenuOpen(false);
-    // wait a tick if we’re on a different page
     if (window.location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
@@ -29,6 +44,44 @@ export default function Navbar() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    setUserType(null);
+    navigate("/login");
+  };
+
+  const navItems = [
+    { label: "الرئيسية", path: "/" },
+    { label: "القائمة", scrollTo: "menu" },
+    { label: "المعرض", scrollTo: "gallery" },
+    { label: "الإعلانات", scrollTo: "announcements" },
+    { label: "تواصل معنا", scrollTo: "contact" },
+    { label: "من نحن", path: "/about" },
+  ];
+
+  const adminNavItems = [
+    { label: "لوحة التحكم", path: "/admin/dashboard" },
+    { label: "إدارة الإعلانات", path: "/admin/announcements" },
+    { label: "إدارة المعرض", path: "/admin/gallery" },
+    { label: "إدارة القائمة", path: "/admin/menu" },
+    { label: "إدارة الرسائل", path: "/admin/contact" },
+    { label: "النشرة الإخبارية", path: "/admin/newsletter" },
+  ];
+
+  const superadminNavItems = [
+    { label: "لوحة التحكم", path: "/admin/dashboard" },
+    { label: "إدارة المستخدمين", path: "/admin/users" },
+    { label: "إدارة الإعلانات", path: "/admin/announcements" },
+    { label: "إدارة المعرض", path: "/admin/gallery" },
+    { label: "إدارة القائمة", path: "/admin/menu" },
+    { label: "إدارة الرسائل", path: "/admin/contact" },
+    { label: "النشرة الإخبارية", path: "/admin/newsletter" },
+  ];
+
+  // Check if user is admin
+  const isAdmin = userType === "admin" ;
+  const isSuperAdmin = userType === "superadmin";
   return (
     <motion.nav
       initial={{ y: -50, opacity: 0 }}
@@ -54,18 +107,55 @@ export default function Navbar() {
         </div>
 
         {/* Desktop links */}
-        <ul className="hidden md:flex gap-6 text-white font-medium text-lg">
-          <li><Link to="/">الرئيسية</Link></li>
-          <li><button onClick={() => handleScrollTo("menu")} className="hover:text-yellow-400">القائمة</button></li>
-          <li><button onClick={() => handleScrollTo("gallery")} className="hover:text-yellow-400">المعرض</button></li>
-          <li><button onClick={() => handleScrollTo("announcements")} className="hover:text-yellow-400">الإعلانات</button></li>
-          <li><button onClick={() => handleScrollTo("contact")} className="hover:text-yellow-400">تواصل معنا</button></li>
-          <li><Link to="/about" className="hover:text-yellow-400">من نحن</Link></li>
-        </ul>
+        <div className="hidden md:flex items-center gap-6">
+          <ul className="flex gap-6 text-white font-medium text-lg">
+            {!isAdmin && !isSuperAdmin &&
+              navItems.map((item, index) => (
+                <li key={index}>
+                  {item.path ? (
+                    <Link to={item.path} className="cursor-pointer hover:text-yellow-400">
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => handleScrollTo(item.scrollTo)}
+                      className="cursor-pointer hover:text-yellow-400"
+                    >
+                      {item.label}
+                    </button>
+                  )}
+                </li>
+              ))}
+            {isAdmin &&
+              adminNavItems.map((item, index) => (
+                <li key={`admin-${index}`}>
+                  <Link to={item.path} className="cursor-pointer hover:text-yellow-400">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              {isSuperAdmin &&
+              superadminNavItems.map((item, index) => (
+                <li key={`admin-${index}`}>
+                  <Link to={item.path} className="hover:text-yellow-400 cursor-pointer ">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+          </ul>
+          {userType &&
+            <button
+              onClick={handleLogout}
+              className="cursor-pointer px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
+            >
+              تسجيل الخروج
+            </button>
+    }
+        </div>
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-white text-2xl"
+          className="md:hidden text-white text-2xl cursor-pointer"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? <FaTimes /> : <FaBars />}
@@ -80,12 +170,51 @@ export default function Navbar() {
           transition={{ duration: 0.4 }}
           className="md:hidden bg-black/95 text-white flex flex-col items-center gap-6 py-8 shadow-lg"
         >
-          <li><Link to="/" onClick={() => setMenuOpen(false)}>الرئيسية</Link></li>
-          <li><button onClick={() => handleScrollTo("menu")}>القائمة</button></li>
-          <li><button onClick={() => handleScrollTo("gallery")}>المعرض</button></li>
-          <li><button onClick={() => handleScrollTo("announcements")}>الإعلانات</button></li>
-          <li><button onClick={() => handleScrollTo("contact")}>تواصل معنا</button></li>
-          <li><Link to="/about" onClick={() => setMenuOpen(false)}>من نحن</Link></li>
+          {!isAdmin && !isSuperAdmin &&
+            navItems.map((item, index) => (
+              <li key={index}>
+                {item.path ? (
+                  <Link to={item.path} onClick={() => setMenuOpen(false)}>
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleScrollTo(item.scrollTo);
+                      setMenuOpen(false);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {item.label}
+                  </button>
+                )}
+              </li>
+            ))}
+          {isAdmin &&
+            adminNavItems.map((item, index) => (
+              <li key={`admin-${index}`}>
+                <Link
+                  to={item.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="hover:text-yellow-400 cursor-pointer"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            {isSuperAdmin &&
+            superadminNavItems.map((item, index) => (
+              <li key={`admin-${index}`}>
+                <Link
+                  to={item.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="hover:text-yellow-400 cursor-pointer"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          
         </motion.ul>
       )}
     </motion.nav>
