@@ -3,7 +3,7 @@ import { FaUtensils, FaPhone } from "react-icons/fa";
 
 export default function Hero() {
   return (
-    <div
+    <div id="home"
       className="h-screen bg-cover bg-center relative flex items-center justify-center text-white"
       style={{ backgroundImage: "url('https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756897472/20250903_1202_Modern_Cozy_Restaurant_simple_compose_01k47ks0w7eg39483aee1108ca_dwogna.png')" }}
     >

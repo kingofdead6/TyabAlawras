@@ -3,10 +3,9 @@ import { FaClock } from "react-icons/fa";
 
 export default function ShopLocationPage() {
   const shopName = "طياب الأوراس";
-  const hours = "09:00 - 20:00";
 
   return (
-    <div className="min-h-screen  text-white py-12 px-4 pt-20">
+    <div id="location" className="min-h-screen  text-white py-12 px-4 pt-20">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -29,12 +28,6 @@ export default function ShopLocationPage() {
             referrerPolicy="no-referrer-when-downgrade"
             title="Shop Location"
           ></iframe>
-        </div>
-
-        {/* Opening hours */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-lg text-gray-300">
-          <FaClock className="text-yellow-400" />
-          <span>ساعات العمل: {hours}</span>
         </div>
       </motion.div>
     </div>

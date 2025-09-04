@@ -15,6 +15,7 @@ import AdminUsers from "./components/Admin/AdminUser";
 import AdminNewsletter from "./components/Admin/AdminNewsletter";
 import NotFound from "./components/Shared/NotFound";
 import ScrollToTop from "./components/Shared/ScrollTop";
+import AdminWorkingTimes from "./components/Admin/AdminWorkingTimes";
 
 export default function App() {
 
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="/admin/contact" element={<AdminContact />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/newsletter" element={<AdminNewsletter />} />
+              <Route path="/admin/working-times" element={<AdminWorkingTimes />} />
             </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

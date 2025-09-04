@@ -55,6 +55,11 @@ export default function AdminDashboard() {
       title: "النشرة الإخبارية",
       description: "عرض المشتركين في النشرة الإخبارية",
     },
+    {
+      path: "/admin/working-times",
+      title: "إدارة أوقات العمل",
+      description: "تحديث أوقات العمل لكل يوم من أيام الأسبوع",
+    }
   ];
 
   const superadminSections = [
@@ -91,14 +96,7 @@ export default function AdminDashboard() {
             </Link>
           ))}
         </div>
-        <div className="mt-8 text-center">
-          <button
-            onClick={handleLogout}
-            className="cursor-pointer px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
-          >
-            تسجيل الخروج
-          </button>
-        </div>
+      
       </motion.div>
     </div>
   );

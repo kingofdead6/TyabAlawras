@@ -10,6 +10,7 @@ import contactRoutes from './routes/contact.js';
 import userRoutes from './routes/users.js';
 import { errorHandler } from './middleware/error.js';
 import newsletterRoutes from './routes/newsletters.js';
+import workingTimesRoutes from './routes/workingtimes.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/working-times', workingTimesRoutes);
 
 app.use(errorHandler);
 

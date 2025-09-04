@@ -41,6 +41,7 @@ export default function Login() {
         } else {
           sessionStorage.setItem("token", token);
         }
+        window.dispatchEvent(new Event("authChanged"));
         setErrors({});
         if (usertype === "admin" || usertype === "superadmin") {
           navigate("/admin/dashboard");
@@ -123,12 +124,12 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
-                className="absolute inset-y-0 left-0 px-3 flex items-center text-gray-400"
+                className="cursor-pointer absolute inset-y-0 left-0 px-3 flex items-center text-gray-400 hover:text-amber-400"
                 aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400 hover:text-amber-400">
                 <FaLock />
               </div>
             </div>
@@ -144,7 +145,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition disabled:opacity-60"
+              className="cursor-pointer w-full py-3 rounded-lg bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition disabled:opacity-60"
             >
               {loading ? "جاري الدخول..." : "دخول"}
             </button>

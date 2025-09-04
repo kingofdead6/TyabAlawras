@@ -10,31 +10,51 @@ export default function Navbar() {
   const [userType, setUserType] = useState(null);
   const navigate = useNavigate();
 
+  // Scroll listener
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
+  // Function to decode and set user type
+  const checkAuth = () => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
         setUserType(decoded.usertype);
-      } catch (error) {
+      } catch {
         setUserType(null);
       }
     } else {
       setUserType(null);
     }
+  };
+
+  // Run once + listen for changes
+  useEffect(() => {
+    checkAuth();
+
+    // Listen to storage changes (cross-tab) and custom auth event (same tab)
+    const handleAuthChange = () => checkAuth();
+    window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("authChanged", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("authChanged", handleAuthChange);
+    };
   }, []);
 
-  const handleScrollTo = (id) => {
+  const handleScrollTo = (id, basePath) => {
     setMenuOpen(false);
-    if (window.location.pathname !== "/") {
+    if (basePath && window.location.pathname !== basePath) {
+      navigate(basePath);
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    } else if (window.location.pathname !== "/" && !basePath) {
       navigate("/");
       setTimeout(() => {
         document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -48,16 +68,20 @@ export default function Navbar() {
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
     setUserType(null);
+    window.dispatchEvent(new Event("authChanged")); // 🔥 force Navbar update
     navigate("/login");
   };
 
+  // ✅ Clean navItems
   const navItems = [
-    { label: "الرئيسية", path: "/" },
-    { label: "القائمة", scrollTo: "menu" },
-    { label: "المعرض", scrollTo: "gallery" },
-    { label: "الإعلانات", scrollTo: "announcements" },
-    { label: "تواصل معنا", scrollTo: "contact" },
-    { label: "من نحن", path: "/about" },
+    { label: "الرئيسية", type: "scroll" , value: "home" , basePath: "/" },
+    { label: "القائمة", type: "scroll", value: "menu" },
+    { label: "أوقات العمل", type: "scroll", value: "Working-times" },
+    { label: "المعرض", type: "scroll", value: "gallery" },
+    { label: "الإعلانات", type: "scroll", value: "announcements" },
+    { label: "تواصل معنا", type: "scroll", value: "contact" },
+    { label: "من نحن", type: "scroll", value:"about" , basePath: "/about" },
+    { label: "الموقع", type: "scroll", value: "location", basePath: "/about" },
   ];
 
   const adminNavItems = [
@@ -67,6 +91,7 @@ export default function Navbar() {
     { label: "إدارة القائمة", path: "/admin/menu" },
     { label: "إدارة الرسائل", path: "/admin/contact" },
     { label: "النشرة الإخبارية", path: "/admin/newsletter" },
+    { label: "أوقات العمل", path: "/admin/working-times" },
   ];
 
   const superadminNavItems = [
@@ -77,11 +102,35 @@ export default function Navbar() {
     { label: "إدارة القائمة", path: "/admin/menu" },
     { label: "إدارة الرسائل", path: "/admin/contact" },
     { label: "النشرة الإخبارية", path: "/admin/newsletter" },
+    { label: "أوقات العمل", path: "/admin/working-times" },
   ];
 
-  // Check if user is admin
-  const isAdmin = userType === "admin" ;
+  const isAdmin = userType === "admin";
   const isSuperAdmin = userType === "superadmin";
+
+  // ✅ Helper to render navItems (desktop + mobile)
+  const renderNavItems = (items) =>
+    items.map((item, index) => (
+      <li key={index}>
+        {item.type === "path" ? (
+          <Link
+            to={item.value}
+            onClick={() => setMenuOpen(false)}
+            className="cursor-pointer hover:text-yellow-400"
+          >
+            {item.label}
+          </Link>
+        ) : (
+          <button
+            onClick={() => handleScrollTo(item.value, item.basePath)}
+            className="cursor-pointer hover:text-yellow-400"
+          >
+            {item.label}
+          </button>
+        )}
+      </li>
+    ));
+
   return (
     <motion.nav
       initial={{ y: -50, opacity: 0 }}
@@ -109,23 +158,8 @@ export default function Navbar() {
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
           <ul className="flex gap-6 text-white font-medium text-lg">
-            {!isAdmin && !isSuperAdmin &&
-              navItems.map((item, index) => (
-                <li key={index}>
-                  {item.path ? (
-                    <Link to={item.path} className="cursor-pointer hover:text-yellow-400">
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => handleScrollTo(item.scrollTo)}
-                      className="cursor-pointer hover:text-yellow-400"
-                    >
-                      {item.label}
-                    </button>
-                  )}
-                </li>
-              ))}
+            {!isAdmin && !isSuperAdmin && renderNavItems(navItems)}
+
             {isAdmin &&
               adminNavItems.map((item, index) => (
                 <li key={`admin-${index}`}>
@@ -134,23 +168,25 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
-              {isSuperAdmin &&
+
+            {isSuperAdmin &&
               superadminNavItems.map((item, index) => (
-                <li key={`admin-${index}`}>
-                  <Link to={item.path} className="hover:text-yellow-400 cursor-pointer ">
+                <li key={`superadmin-${index}`}>
+                  <Link to={item.path} className="hover:text-yellow-400 cursor-pointer">
                     {item.label}
                   </Link>
                 </li>
               ))}
           </ul>
-          {userType &&
+
+          {userType && (
             <button
               onClick={handleLogout}
               className="cursor-pointer px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
             >
               تسجيل الخروج
             </button>
-    }
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -170,26 +206,8 @@ export default function Navbar() {
           transition={{ duration: 0.4 }}
           className="md:hidden bg-black/95 text-white flex flex-col items-center gap-6 py-8 shadow-lg"
         >
-          {!isAdmin && !isSuperAdmin &&
-            navItems.map((item, index) => (
-              <li key={index}>
-                {item.path ? (
-                  <Link to={item.path} onClick={() => setMenuOpen(false)}>
-                    {item.label}
-                  </Link>
-                ) : (
-                  <button
-                    onClick={() => {
-                      handleScrollTo(item.scrollTo);
-                      setMenuOpen(false);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {item.label}
-                  </button>
-                )}
-              </li>
-            ))}
+          {!isAdmin && !isSuperAdmin && renderNavItems(navItems)}
+
           {isAdmin &&
             adminNavItems.map((item, index) => (
               <li key={`admin-${index}`}>
@@ -202,9 +220,10 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-            {isSuperAdmin &&
+
+          {isSuperAdmin &&
             superadminNavItems.map((item, index) => (
-              <li key={`admin-${index}`}>
+              <li key={`superadmin-${index}`}>
                 <Link
                   to={item.path}
                   onClick={() => setMenuOpen(false)}
@@ -214,7 +233,6 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-          
         </motion.ul>
       )}
     </motion.nav>
