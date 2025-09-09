@@ -146,29 +146,45 @@ export default function Footer() {
             {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
             {success && <p className="text-green-400 text-sm mb-4">{success}</p>}
 
-            {/* Social + Contact Info */}
-            <div className="flex flex-col items-center md:items-start gap-3 text-sm">
-              <div className="flex gap-4">
-                <a
-                  href="https://www.tiktok.com/@ttyab_alawras05"
-                  className="hover:text-yellow-400 transition"
-                >
-                  <FaTiktok size={22} />
-                </a>
-                <a
-                  href="https://www.instagram.com/tteyab_elawras05/"
-                  className="hover:text-yellow-400 transition"
-                >
-                  <FaInstagram size={22} />
-                </a>
-              </div>
-              <div className="flex items-center gap-2">
-                <FaEnvelope className="text-yellow-400" /> info@tyabalawras.com
-              </div>
-              <div className="flex items-center gap-2">
-                <FaPhone className="text-yellow-400" /> 0654768883
-              </div>
-            </div>
+            {/* Social + Contact Info + Android Download */}
+<div className="flex flex-col md:flex-row justify-between items-start gap-6 text-sm">
+  {/* Left Side: Social + Contact Info */}
+  <div className="flex flex-col gap-3">
+    <div className="flex gap-4 mb-3">
+      <a
+        href="https://www.tiktok.com/@ttyab_alawras05"
+        className="hover:text-yellow-400 transition"
+      >
+        <FaTiktok size={22} />
+      </a>
+      <a
+        href="https://www.instagram.com/tteyab_elawras05/"
+        className="hover:text-yellow-400 transition"
+      >
+        <FaInstagram size={22} />
+      </a>
+    </div>
+    <div className="flex items-center gap-2">
+      <FaEnvelope className="text-yellow-400" /> info@tyabalawras.com
+    </div>
+    <div className="flex items-center gap-2">
+      <FaPhone className="text-yellow-400" /> 0654768883
+    </div>
+  </div>
+
+  {/* Right Side: Android App Download */}
+  <div className="flex items-center">
+    <a
+      href="https://tyab-elawras-app.vercel.app/TyabElawras.apk"
+      download
+      className="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
+    >
+      حمل التطبيق
+    </a>
+  </div>
+</div>
+
+
           </div>
         </div>
 
