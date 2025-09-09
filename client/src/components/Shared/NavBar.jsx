@@ -246,12 +246,15 @@ export default function Navbar() {
               </li>
             ))}
 
-          {/* Cart button (mobile) - only for normal users */}
           {!isAdmin && !isSuperAdmin && (
-            <Link to="/cart" className="text-white text-2xl hover:text-yellow-400">
-              <FaShoppingCart />
-            </Link>
-          )}
+  <Link
+    to="/cart"
+    onClick={() => setMenuOpen(false)} // ✅ closes menu
+    className="text-white text-2xl hover:text-yellow-400"
+  >
+    <FaShoppingCart />
+  </Link>
+)}
 
           {/* Logout only for admins/superadmins (mobile) */}
           {(isAdmin || isSuperAdmin) && (

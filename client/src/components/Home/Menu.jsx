@@ -42,16 +42,22 @@ export default function Menu() {
   };
 
   const addToCart = (item) => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existingItem = cart.find((cartItem) => cartItem._id === item._id);
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      cart.push({ ...item, quantity: 1 });
-    }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    toast.success(`${item.name} أضيف إلى السلة!`);
-  };
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const existingItem = cart.find((cartItem) => cartItem._id === item._id);
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({ ...item, quantity: 1 });
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  toast.success(`${item.name} أضيف إلى السلة!`, {
+    autoClose: 1000, 
+  });
+};
+
 
   return (
     <section id="menu" className="py-16">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import { FaTrash } from "react-icons/fa";
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -62,20 +62,24 @@ export default function Cart() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ scale: 1.02 }}
-                 className="flex items-center justify-between bg-gradient-to-r from-yellow-400/70 to-black p-5 rounded-2xl shadow-lg"
+                 className="flex items-center justify-between bg-gradient-to-r from-yellow-400/50 to-black p-5 rounded-2xl shadow-lg"
                 >
                   {/* Item details */}
-                  <div className="flex items-center gap-5">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-20 object-cover rounded-xl border-2 border-yellow-400"
-                    />
-                    <div>
-                      <h3 className="text-lg font-semibold">{item.name}</h3>
-                      <p className="text-yellow-400 font-bold">{item.price} د.ج</p>
-                    </div>
-                  </div>
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4  rounded-2xl shadow-md p-4">
+  {/* Image */}
+  <img
+    src={item.image}
+    alt={item.name}
+    className="w-32 h-32 object-cover rounded-xl"
+  />
+
+  {/* Text */}
+  <div className="flex flex-col text-center sm:text-right">
+    <h3 className="text-lg font-bold text-white">{item.name}</h3>
+    <p className="text-yellow-600 text-xl font-semibold">{item.price} دج</p>
+  </div>
+</div>
+
 
                   {/* Actions */}
                   <div className="flex items-center gap-3">
@@ -92,7 +96,7 @@ export default function Cart() {
                       onClick={() => removeItem(item._id)}
                       className="cursor-pointer text-red-500 hover:text-red-600 font-medium"
                     >
-                      ✕
+                      <FaTrash size={26} />
                     </button>
                   </div>
                 </motion.div>
