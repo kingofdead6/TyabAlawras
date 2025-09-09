@@ -16,6 +16,12 @@ import AdminNewsletter from "./components/Admin/AdminNewsletter";
 import NotFound from "./components/Shared/NotFound";
 import ScrollToTop from "./components/Shared/ScrollTop";
 import AdminWorkingTimes from "./components/Admin/AdminWorkingTimes";
+import AdminOrders from "./components/Admin/AdminOrders";
+import Cart from "./components/Home/Cart";
+import Checkout from "./components/Home/Checkout";
+import AdminDeliveryAreas from "./components/Admin/AdminDeliveryAreas";
+import OrderConfirmation from "./components/Home/OrderConfirmation";
+import AdminVideos from "./components/Admin/AdminVideos";
 
 export default function App() {
 
@@ -27,6 +33,9 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/cart" element={<Cart /> }/>
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-confirmation" element={<OrderConfirmation /> }/>
             <Route element={<ProtectedRoute />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/announcements" element={<AdminAnnouncements />} />
@@ -36,6 +45,9 @@ export default function App() {
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/newsletter" element={<AdminNewsletter />} />
               <Route path="/admin/working-times" element={<AdminWorkingTimes />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
+              <Route path="/admin/videos" element={<AdminVideos />} />
             </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

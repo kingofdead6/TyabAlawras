@@ -11,7 +11,9 @@ import userRoutes from './routes/users.js';
 import { errorHandler } from './middleware/error.js';
 import newsletterRoutes from './routes/newsletters.js';
 import workingTimesRoutes from './routes/workingtimes.js';
-
+import orderRoutes from './routes/orders.js';
+import deliveryAreasRoutes from './routes/deliveryAreas.js';
+import videoRoutes from './routes/videos.js';
 dotenv.config();
 
 const app = express();
@@ -31,7 +33,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/working-times', workingTimesRoutes);
-
+app.use('/api/orders', orderRoutes);
+app.use('/api/delivery-areas', deliveryAreasRoutes);
+app.use('/api/videos', videoRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

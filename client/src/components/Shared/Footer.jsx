@@ -1,7 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
+import { motion } from "framer-motion";
 import { FaFacebook, FaInstagram, FaEnvelope, FaPhone, FaTiktok } from "react-icons/fa";
+import axios from "axios";
 import { API_BASE_URL } from "../../../api";
+import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -9,6 +11,7 @@ export default function Footer() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = () => {
     if (!email) return "البريد الإلكتروني مطلوب";
@@ -18,19 +21,19 @@ export default function Footer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const error = validateForm();
-    setFormError(error);
+    const err = validateForm();
+    setFormError(err);
 
-    if (error) return;
+    if (err) return;
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/newsletter`, { email });
+      await axios.post(`${API_BASE_URL}/newsletter`, { email });
       setEmail("");
       setSuccess("تم الاشتراك بنجاح!");
       setError("");
     } catch (err) {
-      console.error('Subscribe newsletter error:', err);
+      console.error("Subscribe newsletter error:", err);
       setError(err.response?.data?.message || "⚠️ خطأ في الاشتراك بالنشرة البريدية");
       setSuccess("");
     } finally {
@@ -38,13 +41,43 @@ export default function Footer() {
     }
   };
 
+  // Smooth scroll like Navbar
+  const handleScrollTo = (id, basePath) => {
+    if (basePath && window.location.pathname !== basePath) {
+      navigate(basePath);
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    } else if (window.location.pathname !== "/" && !basePath) {
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Footer links like Navbar navItems
+  const footerLinks = [
+    { label: "الرئيسية", type: "scroll", value: "home", basePath: "/" },
+    { label: "من نحن", type: "scroll", value: "about", basePath: "/about" },
+    { label: "القائمة", type: "scroll", value: "menu" },
+    { label: "تواصل معنا", type: "scroll", value: "contact" },
+  ];
+
   return (
-    <footer className="bg-gradient-to-r from-yellow-700 via-yellow-900 to-black text-gray-200 pt-12 pb-6 mt-16">
+    <motion.footer
+      initial={{ y: 50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6 }}
+      className="bg-gradient-to-r from-yellow-700 via-yellow-900 to-black text-gray-200 pt-12 pb-6 mt-16"
+    >
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start text-center md:text-right">
           {/* Logo + Info */}
           <div className="flex flex-col items-center md:items-start">
-            <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-2xl shadow-[0_0_12px_red] overflow-hidden">
+            <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-2xl overflow-hidden">
               <img
                 className="rounded-full w-full h-full object-cover"
                 src="https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756897359/465660711_1763361547537323_2674934284076407223_n_prlt48.jpg"
@@ -55,7 +88,7 @@ export default function Footer() {
             <p className="text-sm mt-2 text-gray-300">
               مطعم يقدم أشهى الأطباق بلمسة أصيلة من الأوراس.
             </p>
-            <p className="mt-3 text-sm text-yellow-400 drop-shadow-[0_0_6px_red]">
+            <p className="mt-3 text-sm text-yellow-400 ">
               صُنع بواسطة{" "}
               <a
                 href="https://softwebelevation.com"
@@ -72,11 +105,16 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold text-yellow-400 mb-4">روابط سريعة</h4>
             <ul className="space-y-2">
-              <li><a href="#hero" className="hover:text-yellow-400 transition">الرئيسية</a></li>
-              <li><a href="#about" className="hover:text-yellow-400 transition">من نحن</a></li>
-              <li><a href="#menu" className="hover:text-yellow-400 transition">القائمة</a></li>
-              <li><a href="#gallery" className="hover:text-yellow-400 transition">المعرض</a></li>
-              <li><a href="#contact" className="hover:text-yellow-400 transition">تواصل معنا</a></li>
+              {footerLinks.map((item, idx) => (
+                <li key={idx}>
+                  <button
+                    onClick={() => handleScrollTo(item.value, item.basePath)}
+                    className="hover:text-yellow-400 transition cursor-pointer"
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -97,7 +135,7 @@ export default function Footer() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`cursor-pointer px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition shadow-[0_0_6px_red] ${
+                className={`cursor-pointer px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition  ${
                   loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
@@ -111,8 +149,18 @@ export default function Footer() {
             {/* Social + Contact Info */}
             <div className="flex flex-col items-center md:items-start gap-3 text-sm">
               <div className="flex gap-4">
-                <a href="https://www.tiktok.com/@ttyab_alawras05?_t=ZM-8y2EiKikxDZ&_r=1&fbclid=PAZXh0bgNhZW0CMTEAAacDEjb8q2Jazevh_E6YibPVSfXq9hLbTpnZFcw4JuIQUCWfxfn4mFQ8aGZAMg_aem_HBfQaCDG9lw6B_11NghDxA" className="hover:text-yellow-400 transition"><FaTiktok size={22} /></a>
-                <a href="https://www.instagram.com/tteyab_elawras05/" className="hover:text-yellow-400 transition"><FaInstagram size={22} /></a>
+                <a
+                  href="https://www.tiktok.com/@ttyab_alawras05"
+                  className="hover:text-yellow-400 transition"
+                >
+                  <FaTiktok size={22} />
+                </a>
+                <a
+                  href="https://www.instagram.com/tteyab_elawras05/"
+                  className="hover:text-yellow-400 transition"
+                >
+                  <FaInstagram size={22} />
+                </a>
               </div>
               <div className="flex items-center gap-2">
                 <FaEnvelope className="text-yellow-400" /> info@tyabalawras.com
@@ -129,6 +177,6 @@ export default function Footer() {
           © 2025 طياب الأوراس - جميع الحقوق محفوظة
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

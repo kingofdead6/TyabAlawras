@@ -41,6 +41,11 @@ export default function AdminDashboard() {
       description: "إضافة وحذف الصور",
     },
     {
+      path: "/admin/videos",
+      title: "إدارة الفيديوهات",
+      description: "إضافة وحذف الفيديوهات",
+    },
+    {
       path: "/admin/menu",
       title: "إدارة القائمة",
       description: "إنشاء، تعديل، وحذف عناصر القائمة",
@@ -59,7 +64,17 @@ export default function AdminDashboard() {
       path: "/admin/working-times",
       title: "إدارة أوقات العمل",
       description: "تحديث أوقات العمل لكل يوم من أيام الأسبوع",
-    }
+    },
+    {
+    path: "/admin/orders",
+    title: "إدارة الطلبات",
+    description: "عرض وتحديث الطلبات والتوصيل",
+  },
+  {
+    path: "/admin/delivery-areas",
+    title: "إدارة مناطق التوصيل",
+    description: "إضافة وتعديل أسعار التوصيل حسب المناطق",
+  },
   ];
 
   const superadminSections = [
@@ -89,7 +104,7 @@ export default function AdminDashboard() {
             <Link
               key={index}
               to={section.path}
-              className="p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition text-center shadow-lg hover:shadow-2xl shadow-red-500"
+              className="p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition text-center shadow-lg hover:shadow-2xl shadow-yellow-400"
             >
               <h2 className="text-2xl font-semibold text-yellow-400">{section.title}</h2>
               <p className="mt-2 text-gray-300">{section.description}</p>

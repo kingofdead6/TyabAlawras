@@ -111,7 +111,7 @@ export default function AdminGallery() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
-                className=" shadow-red-500 bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition"
+                className=" shadow-yellow-400 bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition"
               >
                 <img
                   src={img.image}

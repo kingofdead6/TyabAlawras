@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
-    <section className="flex items-center justify-center h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-4">
+    <section className="flex items-center justify-center h-screen  text-white px-4">
       <div className="text-center">
         {/* 404 Title */}
         <motion.h1

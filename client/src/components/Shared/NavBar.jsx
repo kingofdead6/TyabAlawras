@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaShoppingCart } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 
 export default function Navbar() {
@@ -36,7 +36,6 @@ export default function Navbar() {
   useEffect(() => {
     checkAuth();
 
-    // Listen to storage changes (cross-tab) and custom auth event (same tab)
     const handleAuthChange = () => checkAuth();
     window.addEventListener("storage", handleAuthChange);
     window.addEventListener("authChanged", handleAuthChange);
@@ -68,47 +67,55 @@ export default function Navbar() {
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
     setUserType(null);
-    window.dispatchEvent(new Event("authChanged")); // 🔥 force Navbar update
+    window.dispatchEvent(new Event("authChanged"));
     navigate("/login");
   };
 
-  // ✅ Clean navItems
+  // Navigation items for regular users
   const navItems = [
-    { label: "الرئيسية", type: "scroll" , value: "home" , basePath: "/" },
+    { label: "الرئيسية", type: "scroll", value: "home", basePath: "/" },
     { label: "القائمة", type: "scroll", value: "menu" },
     { label: "أوقات العمل", type: "scroll", value: "Working-times" },
     { label: "المعرض", type: "scroll", value: "gallery" },
     { label: "الإعلانات", type: "scroll", value: "announcements" },
     { label: "تواصل معنا", type: "scroll", value: "contact" },
-    { label: "من نحن", type: "scroll", value:"about" , basePath: "/about" },
+    { label: "من نحن", type: "scroll", value: "about", basePath: "/about" },
     { label: "الموقع", type: "scroll", value: "location", basePath: "/about" },
   ];
 
+  // Navigation items for admins
   const adminNavItems = [
     { label: "لوحة التحكم", path: "/admin/dashboard" },
     { label: "إدارة الإعلانات", path: "/admin/announcements" },
     { label: "إدارة المعرض", path: "/admin/gallery" },
+    { label: "إدارة الفيديوهات", path: "/admin/videos" },
     { label: "إدارة القائمة", path: "/admin/menu" },
     { label: "إدارة الرسائل", path: "/admin/contact" },
     { label: "النشرة الإخبارية", path: "/admin/newsletter" },
     { label: "أوقات العمل", path: "/admin/working-times" },
+    { label: "إدارة الطلبات", path: "/admin/orders" },
+    { label: "إدارة مناطق التوصيل", path: "/admin/delivery-areas" },
   ];
 
+  // Navigation items for superadmins
   const superadminNavItems = [
     { label: "لوحة التحكم", path: "/admin/dashboard" },
     { label: "إدارة المستخدمين", path: "/admin/users" },
     { label: "إدارة الإعلانات", path: "/admin/announcements" },
     { label: "إدارة المعرض", path: "/admin/gallery" },
+    { label: "إدارة الفيديوهات", path: "/admin/videos" },
     { label: "إدارة القائمة", path: "/admin/menu" },
     { label: "إدارة الرسائل", path: "/admin/contact" },
     { label: "النشرة الإخبارية", path: "/admin/newsletter" },
     { label: "أوقات العمل", path: "/admin/working-times" },
+    { label: "إدارة الطلبات", path: "/admin/orders" },
+    { label: "إدارة مناطق التوصيل", path: "/admin/delivery-areas" },
   ];
 
   const isAdmin = userType === "admin";
   const isSuperAdmin = userType === "superadmin";
 
-  // ✅ Helper to render navItems (desktop + mobile)
+  // Helper to render navItems
   const renderNavItems = (items) =>
     items.map((item, index) => (
       <li key={index}>
@@ -143,16 +150,14 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         {/* Logo */}
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center shadow-[0_0_10px_#ff1a1a]">
+          <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center ">
             <img
               className="rounded-full"
               src="https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756897359/465660711_1763361547537323_2674934284076407223_n_prlt48.jpg"
               alt="Logo"
             />
           </div>
-          <h1 className="ml-3 text-xl font-bold text-white drop-shadow-[0_0_6px_#ff1a1a]">
-            طياب الأوراس
-          </h1>
+          <h1 className="ml-3 text-xl font-bold text-white">طياب الأوراس</h1>
         </div>
 
         {/* Desktop links */}
@@ -178,6 +183,13 @@ export default function Navbar() {
                 </li>
               ))}
           </ul>
+
+          {/* Cart button (desktop) - only for normal users */}
+          {!isAdmin && !isSuperAdmin && (
+            <Link to="/cart" className="text-white text-2xl hover:text-yellow-400">
+              <FaShoppingCart />
+            </Link>
+          )}
 
           {userType && (
             <button
@@ -233,6 +245,23 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
+
+          {/* Cart button (mobile) - only for normal users */}
+          {!isAdmin && !isSuperAdmin && (
+            <Link to="/cart" className="text-white text-2xl hover:text-yellow-400">
+              <FaShoppingCart />
+            </Link>
+          )}
+
+          {/* Logout only for admins/superadmins (mobile) */}
+          {(isAdmin || isSuperAdmin) && (
+            <button
+              onClick={handleLogout}
+              className="cursor-pointer px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
+            >
+              تسجيل الخروج
+            </button>
+          )}
         </motion.ul>
       )}
     </motion.nav>

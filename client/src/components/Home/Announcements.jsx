@@ -29,7 +29,7 @@ export default function Announcements() {
   return (
     <section id="announcements" className="py-20" dir="rtl">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-4xl font-bold text-yellow-400 drop-shadow-[0_0_10px_red] mb-12">
+        <h2 className="text-4xl font-bold text-yellow-400  mb-12">
           الإعلانات
         </h2>
 
@@ -46,7 +46,7 @@ export default function Announcements() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: i * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-black/70 rounded-2xl overflow-hidden shadow-lg shadow-red-500 hover:shadow-2xl border border-yellow-400/20"
+                className="bg-black/70 rounded-2xl overflow-hidden shadow-lg shadow-yellow-400 hover:shadow-2xl border border-yellow-400/20 duration-300 transition-transform hover:scale-[1.02]"
               >
                 <img
                   src={item.image}
@@ -54,7 +54,7 @@ export default function Announcements() {
                   className="w-full h-56 object-cover"
                 />
                 <div className="p-6 text-white">
-                  <h3 className="text-2xl font-semibold mb-3 text-yellow-300 drop-shadow-[0_0_5px_red]">
+                  <h3 className="text-2xl font-semibold mb-3 text-yellow-300 ">
                     {item.title}
                   </h3>
                   <p className="text-gray-200 text-sm leading-relaxed">

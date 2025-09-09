@@ -99,9 +99,9 @@ export default function AdminNewsletter() {
 
   const toggleSelectAll = () => {
     if (selectedSubscribers.length === subscribers.length) {
-      setSelectedSubscribers([]); // unselect all
+      setSelectedSubscribers([]); 
     } else {
-      setSelectedSubscribers(subscribers.map((s) => s._id)); // select all
+      setSelectedSubscribers(subscribers.map((s) => s._id)); 
     }
   };
 
@@ -139,7 +139,7 @@ export default function AdminNewsletter() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl transition shadow-red-500"
+                className="bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl transition shadow-yellow-400"
                 dir="rtl"
               >
                 <div className="flex justify-between items-start">

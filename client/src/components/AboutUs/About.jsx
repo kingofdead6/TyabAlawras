@@ -13,7 +13,7 @@ export default function AboutIntro() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-extrabold mb-6"
+          className="text-4xl sm:text-5xl font-extrabold mb-6 text-yellow-400"
         >
           من نحن
         </motion.h2>

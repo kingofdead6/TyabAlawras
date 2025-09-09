@@ -102,7 +102,7 @@ export default function AdminAnnouncements() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className=" shadow-red-500 bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition"
+                className=" shadow-yellow-400 bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition"
               >
                 {announcement.image && (
                   <img

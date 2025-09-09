@@ -110,7 +110,7 @@ export default function OpeningDashboard() {
               key={item._id}
               whileHover={{ scale: 1.05 }}
               onClick={() => openEditModal(item)}
-              className="cursor-pointer bg-black/40 backdrop-blur-md border border-gray-700 rounded-2xl shadow-red-500 shadow-lg p-6 min-w-[200px] max-w-[250px] flex flex-col items-center text-white transition"
+              className="cursor-pointer bg-black/40 backdrop-blur-md border border-gray-700 rounded-2xl shadow-yellow-400 shadow-lg p-6 min-w-[200px] max-w-[250px] flex flex-col items-center text-white transition"
             >
               {item.isClosed ? (
                 <XCircle className="w-8 h-8 mb-3 text-red-400" />

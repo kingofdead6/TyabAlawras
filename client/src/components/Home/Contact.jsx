@@ -50,7 +50,7 @@ export default function Contact() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-4xl font-bold text-yellow-400 drop-shadow-[0_0_10px_red] mb-12"
+          className="text-4xl font-bold text-yellow-400 mb-12"
         >
           تواصل معنا
         </motion.h2>
@@ -61,7 +61,7 @@ export default function Contact() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-xl mx-auto bg-black/70 p-8 rounded-2xl shadow-lg border border-yellow-400/20 shadow-red-500"
+          className="max-w-xl mx-auto bg-black/70 p-8 rounded-2xl shadow-lg border border-yellow-400/20 shadow-yellow-400"
           dir="rtl"
         >
           {error && <p className="text-red-400 text-center mb-4">{error}</p>}
@@ -79,7 +79,7 @@ export default function Contact() {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="اكتب اسمك"
               className={`w-full p-3 rounded-lg bg-gray-800 text-white border ${
-                formErrors.name ? "border-red-500" : "border-gray-600"
+                formErrors.name ? "border-yellow-400" : "border-gray-600"
               } focus:border-yellow-400 outline-none`}
             />
             {formErrors.name && (
@@ -99,7 +99,7 @@ export default function Contact() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="example@email.com"
               className={`w-full p-3 rounded-lg bg-gray-800 text-white border ${
-                formErrors.email ? "border-red-500" : "border-gray-600"
+                formErrors.email ? "border-yellow-400" : "border-gray-600"
               } focus:border-yellow-400 outline-none`}
             />
             {formErrors.email && (
@@ -119,7 +119,7 @@ export default function Contact() {
               rows="5"
               placeholder="اكتب رسالتك هنا..."
               className={`w-full p-3 rounded-lg bg-gray-800 text-white border ${
-                formErrors.message ? "border-red-500" : "border-gray-600"
+                formErrors.message ? "border-yellow-400" : "border-gray-600"
               } focus:border-yellow-400 outline-none resize-none`}
             />
             {formErrors.message && (
@@ -130,7 +130,7 @@ export default function Contact() {
           <button
             type="submit"
             disabled={loading}
-            className={`cursor-pointer w-full py-3 rounded-lg bg-yellow-400 text-black font-bold text-lg hover:bg-yellow-300 transition drop-shadow-[0_0_8px_red] ${
+            className={`cursor-pointer w-full py-3 rounded-lg bg-yellow-400 text-black font-bold text-lg hover:bg-yellow-300 transition ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
