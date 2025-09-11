@@ -1,14 +1,17 @@
 import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Text, Image, TouchableOpacity, Platform } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
+import FirstLaunchPromo from "@/component/FirstLaunchPromo";
 
 export default function TabsLayout() {
   const router = useRouter();
 
   return (
     <SafeAreaView className="flex-1 bg-black" edges={["top", "left", "right"]}>
-      {/* Custom Top Bar */}
+      <FirstLaunchPromo />
+      {/* Top Bar */}
       <View className="flex-row justify-between items-center px-4 py-2 bg-black">
         <View className="flex-row items-center gap-2">
           <Image
@@ -25,50 +28,58 @@ export default function TabsLayout() {
         </TouchableOpacity>
       </View>
 
-      {/* Bottom Tabs */}
+      {/* Tabs */}
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {
-            backgroundColor: "#000",
-            borderTopWidth: 0,
-            height: Platform.OS === "ios" ? 50 : 47,
-            paddingBottom: Platform.OS === "ios" ? 20 : 8,
-            flexDirection: "row",
+            position: "absolute",
+            bottom: 40,
+            left: 70,
+            height: 60,
+            width: 300, 
+            borderRadius: 100,
+            borderWidth: 2,
+            borderColor: "#FACC15",
+            backgroundColor: "transparent",
+            overflow: "hidden",
             justifyContent: "space-around",
+            flexDirection: "row",
+            marginLeft: 40,
           },
+          tabBarBackground: () => (
+            <BlurView
+              intensity={120}
+              tint="dark"
+              style={{
+                flex: 1,
+                borderRadius: 100,
+              }}
+            />
+          ),
           tabBarActiveTintColor: "#FACC15",
           tabBarInactiveTintColor: "#9CA3AF",
           tabBarIcon: ({ color, size }) => {
             let iconName: keyof typeof Ionicons.glyphMap = "home-outline";
-            let label = "";
-
             switch (route.name) {
               case "Announcements":
-                iconName = "megaphone-outline";
-                label = "الإعلانات";
+                iconName = "home-outline";
                 break;
               case "Menu":
                 iconName = "restaurant-outline";
-                label = "القائمة";
                 break;
-              case "OpeningTimes":
-                iconName = "time-outline";
-                label = "أوقات العمل";
+              case "VedioMobile":
+                iconName = "tv-outline";
                 break;
               case "ShopLocationPage":
                 iconName = "location-outline";
-                label = "الموقع";
                 break;
             }
-            
 
             return (
-              <View  style={{ alignItems: "center", width: 110 }}> 
-                {/* wider width so label fits in one line */}
-                <Ionicons className="border-1 border-white rounded-full" name={iconName} size={size + 4} color={color} />
-                
+              <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }} className="-mb-4">
+                <Ionicons name={iconName} size={size + 4} color={color} />
               </View>
             );
           },
@@ -76,7 +87,7 @@ export default function TabsLayout() {
       >
         <Tabs.Screen name="Announcements" />
         <Tabs.Screen name="Menu" />
-        <Tabs.Screen name="OpeningTimes" />
+        <Tabs.Screen name="VedioMobile" />
         <Tabs.Screen name="ShopLocationPage" />
       </Tabs>
     </SafeAreaView>

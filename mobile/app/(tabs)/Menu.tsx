@@ -5,6 +5,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../../api";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import NetInfo from "@react-native-community/netinfo";
 
 interface MenuItem {
   _id: string;
@@ -16,14 +17,17 @@ interface MenuItem {
 }
 
 export default function Menu() {
-    const insets = useSafeAreaInsets(); // 👈 get safe area values
+  const insets = useSafeAreaInsets();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [visible, setVisible] = useState<number>(12);
   const [selectedType, setSelectedType] = useState<string>("الكل");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
+  const [isOffline, setIsOffline] = useState<boolean>(false);
+
+  // store "added to cart" status for each item
+  const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
 
   const types = ["الكل", ...Array.from(new Set(menuItems.map((item) => item.type)))];
   const filteredMenuItems = menuItems.filter((item) => {
@@ -33,7 +37,13 @@ export default function Menu() {
   });
 
   useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOffline(!state.isConnected);
+    });
+
     fetchMenuItems();
+
+    return () => unsubscribe();
   }, []);
 
   const fetchMenuItems = async () => {
@@ -41,10 +51,17 @@ export default function Menu() {
     setError("");
     try {
       const response = await axios.get<MenuItem[]>(`${API_BASE_URL}/menu`);
-      setMenuItems(response.data || []);
+      const data = response.data || [];
+      setMenuItems(data);
+      await AsyncStorage.setItem("menu", JSON.stringify(data));
     } catch (err: any) {
       console.error("Fetch menu items error:", err);
-      setError(err.response?.data?.message || "⚠️ خطأ في جلب عناصر القائمة");
+      setError("⚠️ لا يمكن الاتصال بالإنترنت. يتم عرض القائمة المحفوظة.");
+
+      const cachedMenu = await AsyncStorage.getItem("menu");
+      if (cachedMenu) {
+        setMenuItems(JSON.parse(cachedMenu));
+      }
     } finally {
       setLoading(false);
     }
@@ -59,8 +76,12 @@ export default function Menu() {
       cart.push({ ...item, quantity: 1 });
     }
     await AsyncStorage.setItem("cart", JSON.stringify(cart));
-    setMessage(`${item.name} أضيف إلى السلة`);
-    setTimeout(() => setMessage(""), 2000);
+
+    // show "added" message for this item
+    setAddedMap((prev) => ({ ...prev, [item._id]: true }));
+    setTimeout(() => {
+      setAddedMap((prev) => ({ ...prev, [item._id]: false }));
+    }, 1500);
   };
 
   const renderItem = ({ item, index }: { item: MenuItem; index: number }) => (
@@ -70,11 +91,20 @@ export default function Menu() {
     >
       <Image
         source={{ uri: item.image }}
-        className="w-full h-56 rounded-2xl mb-3"
+        className="w-full h-56 rounded-2xl mb-2"
         style={{ resizeMode: "cover" }}
       />
+
+      {/* Added to cart message */}
+      {addedMap[item._id] && (
+        <View className="bg-green-500 px-3 py-1 rounded-full mb-2">
+          <Text className="text-black font-semibold text-center">أضيف إلى السلة</Text>
+        </View>
+      )}
+
       <Text className="text-lg font-bold text-white text-center">{item.name}</Text>
       <Text className="text-yellow-400 mt-1 font-semibold">{item.price} د.ج</Text>
+
       <TouchableOpacity
         onPress={() => addToCart(item)}
         className="mt-3 px-4 py-2 bg-yellow-400 rounded-full w-full"
@@ -88,8 +118,13 @@ export default function Menu() {
     <View className="px-4 py-6 bg-black">
       <Text className="text-4xl font-bold text-yellow-400 text-center mb-6">القائمة</Text>
 
-      {error ? <Text className="text-red-400 text-center mb-4">{error}</Text> : null}
-      {message ? <Text className="text-green-400 text-center mb-4 font-semibold">{message}</Text> : null}
+      {isOffline && (
+        <Text className="text-orange-400 text-center mb-3">
+          📴 وضع عدم الاتصال — يتم عرض البيانات المخزنة
+        </Text>
+      )}
+
+      {error && <Text className="text-red-400 text-center mb-4">{error}</Text>}
 
       <TextInput
         placeholder="ابحث عن عنصر..."
@@ -128,7 +163,7 @@ export default function Menu() {
     </View>
   );
 
-   return (
+  return (
     <View className="flex-1 bg-black">
       {loading ? (
         <Text className="text-gray-400 text-center mt-10">جارٍ التحميل...</Text>
@@ -141,8 +176,7 @@ export default function Menu() {
           ListHeaderComponent={renderHeader}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            paddingBottom: insets.bottom + 90, 
-            // 👆 leave space: safe area + tab bar height (~80–90)
+            paddingBottom: insets.bottom + 90,
           }}
           ListFooterComponent={
             visible < filteredMenuItems.length ? (

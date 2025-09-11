@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal } from "react-native";
-import { Picker } from '@react-native-picker/picker';
+import { Picker } from "@react-native-picker/picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -31,7 +31,14 @@ interface MenuItem {
 }
 
 export default function Checkout() {
-  const [form, setForm] = useState<FormData>({ name: "", phone: "", area: "", address: "", notes: "" });
+  const [form, setForm] = useState<FormData>({
+    name: "",
+    phone: "",
+    area: "",
+    address: "",
+    notes: "",
+  });
+
   const [areas, setAreas] = useState<DeliveryArea[]>([]);
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
   const [cartItems, setCartItems] = useState<MenuItem[]>([]);
@@ -40,9 +47,11 @@ export default function Checkout() {
   const [loading, setLoading] = useState<boolean>(false);
   const [showPopup, setShowPopup] = useState<boolean>(false);
 
-const router = useRouter();
+  const router = useRouter();
+
   useEffect(() => {
     fetchAreas();
+
     const fetchCart = async () => {
       const storedCart = JSON.parse((await AsyncStorage.getItem("cart")) || "[]") as MenuItem[];
       setCartItems(storedCart);
@@ -51,6 +60,15 @@ const router = useRouter();
       setTotal(sum + deliveryFee);
     };
     fetchCart();
+
+    // Load saved customer info
+    const loadForm = async () => {
+      const savedForm = await AsyncStorage.getItem("checkoutForm");
+      if (savedForm) {
+        setForm(JSON.parse(savedForm));
+      }
+    };
+    loadForm();
   }, [deliveryFee]);
 
   const fetchAreas = async () => {
@@ -62,8 +80,13 @@ const router = useRouter();
     }
   };
 
-  const handleChange = (name: keyof FormData, value: string) => {
-    setForm({ ...form, [name]: value });
+  const handleChange = async (name: keyof FormData, value: string) => {
+    const updatedForm = { ...form, [name]: value };
+    setForm(updatedForm);
+
+    // Save form automatically (without delivery fee)
+    await AsyncStorage.setItem("checkoutForm", JSON.stringify(updatedForm));
+
     if (name === "area") {
       const selectedArea = areas.find((a) => a._id === value);
       const fee = selectedArea ? selectedArea.price : 0;
@@ -72,51 +95,47 @@ const router = useRouter();
     }
   };
 
-const handleSubmit = async () => {
-  if (!form.name || !form.phone || !form.area || !form.address) {
-    Toast.show({ type: "error", text1: "خطأ", text2: "يرجى ملء جميع الحقول" });
-    return;
-  }
-  setLoading(true);
-  try {
-    const selectedArea = areas.find((a) => a._id === form.area);
-    const orderData = {
-      items: cartItems.map((item) => ({
-        menuItem: item._id,
-        quantity: item.quantity,
-      })),
-      totalAmount: total,
-      deliveryFee,
-      deliveryArea: selectedArea ? selectedArea.name : "غير محدد",
-      customerName: form.name,
-      customerPhone: form.phone,
-      deliveryAddress: form.address,
-      notes: form.notes || "",
-      paymentMethod: "cash_on_delivery",
-      status: "pending",
-    };
+  const handleSubmit = async () => {
+    if (!form.name || !form.phone || !form.area || !form.address) {
+      Toast.show({ type: "error", text1: "خطأ", text2: "يرجى ملء جميع الحقول" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const selectedArea = areas.find((a) => a._id === form.area);
+      const orderData = {
+        items: cartItems.map((item) => ({
+          menuItem: item._id,
+          quantity: item.quantity,
+        })),
+        totalAmount: total,
+        deliveryFee,
+        deliveryArea: selectedArea ? selectedArea.name : "غير محدد",
+        customerName: form.name,
+        customerPhone: form.phone,
+        deliveryAddress: form.address,
+        notes: form.notes || "",
+        paymentMethod: "cash_on_delivery",
+        status: "pending",
+      };
 
-    const response = await axios.post(`${API_BASE_URL}/orders`, orderData);
+      const response = await axios.post(`${API_BASE_URL}/orders`, orderData);
+      console.log("Order response:", response.data);
 
-    console.log("Order response:", response.data);
+      await AsyncStorage.removeItem("cart");
 
-    await AsyncStorage.removeItem("cart");
-
-
-    setShowPopup(true);
-    setTimeout(() => {
-      setShowPopup(false);
-      router.push("/(tabs)/Menu"); 
-    }, 3000);
-
-  } catch (err: any) {
-    console.log("Order error:", err.response?.data || err.message);
-    Toast.show({ type: "error", text1: "خطأ", text2: "خطأ في التقديم" });
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push("/(tabs)/Menu");
+      }, 3000);
+    } catch (err: any) {
+      console.log("Order error:", err.response?.data || err.message);
+      Toast.show({ type: "error", text1: "خطأ", text2: "خطأ في التقديم" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-black px-4 py-6">
@@ -195,20 +214,24 @@ const handleSubmit = async () => {
             </Text>
           </View>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={loading}
             className={`p-5 rounded-2xl ${loading ? "bg-gray-500" : "bg-yellow-400"}`}
           >
-            <Text className={`text-center font-bold text-lg ${loading ? "text-gray-300" : "text-black"}`}>
+            <Text
+              className={`text-center font-bold text-lg ${
+                loading ? "text-gray-300" : "text-black"
+              }`}
+            >
               {loading ? "جارٍ..." : "تقديم الطلب"}
             </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {/* Popup Confirmation */}
+      {/* Popup */}
       <Modal transparent visible={showPopup} animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/70 px-4">
           <View className="bg-black/80 border-4 border-yellow-400 p-6 rounded-3xl w-full">
