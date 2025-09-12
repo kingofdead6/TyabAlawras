@@ -4,7 +4,6 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import FirstLaunchPromo from "@/component/FirstLaunchPromo";
-import Logo from "../../assets/Logo.png"
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -16,7 +15,9 @@ export default function TabsLayout() {
       <View className="flex-row justify-between items-center px-4 py-2 bg-black">
         <View className="flex-row items-center gap-2">
           <Image
-            source={Logo}
+            source={{
+              uri: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756897359/465660711_1763361547537323_2674934284076407223_n_prlt48.jpg",
+            }}
             className="w-16 h-16 rounded-full"
           />
           <Text className="text-white text-xl font-bold">طياب الأوراس</Text>
