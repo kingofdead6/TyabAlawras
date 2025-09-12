@@ -154,42 +154,46 @@ export default function OpeningTimes() {
 
       {/* Popup Modal */}
       <Modal
-        transparent
-        visible={!!selectedDay}
-        animationType="fade"
-        onRequestClose={() => setSelectedDay(null)}
-      >
-        <View className="flex-1 bg-black/60 justify-center items-center">
-          <View className="bg-black/90 border border-yellow-400/30 rounded-3xl p-6 w-4/5">
-            <Text className="text-2xl text-yellow-400 font-bold text-center mb-4">
-              {selectedDay?.day}
-            </Text>
+  transparent
+  visible={!!selectedDay}
+  animationType="fade"
+  onRequestClose={() => setSelectedDay(null)}
+>
+  <View className="flex-1 bg-black/60 justify-center items-center">
+    <View
+      className="bg-black border border-yellow-400 rounded-3xl p-6"
+      style={{ minWidth: 200, width: '10%' }}
+    >
+      <Text className="text-2xl text-yellow-400 font-bold text-center mb-4">
+        {selectedDay?.day}
+      </Text>
 
-            {selectedDay?.isClosed ? (
-              <Text className="text-red-400 text-lg text-center">مغلق</Text>
-            ) : (
-              <View className="flex-col items-center">
-                <Text className="text-yellow-300 text-lg font-semibold">
-                  {formatTime(selectedDay?.open || null)}
-                </Text>
-                <Text className="text-gray-500 font-bold">—</Text>
-                <Text className="text-yellow-300 text-lg font-semibold">
-                  {formatTime(selectedDay?.close || null)}
-                </Text>
-              </View>
-            )}
-
-            <TouchableOpacity
-              onPress={() => setSelectedDay(null)}
-              className="mt-6 bg-yellow-500 rounded-xl py-2 px-6"
-            >
-              <Text className="text-black text-center font-bold text-lg">
-                إغلاق
-              </Text>
-            </TouchableOpacity>
-          </View>
+      {selectedDay?.isClosed ? (
+        <Text className="text-red-400 text-lg text-center">مغلق</Text>
+      ) : (
+        <View className="flex-col items-center">
+          <Text className="text-yellow-300 text-lg font-semibold">
+            {formatTime(selectedDay?.open || null)}
+          </Text>
+          <Text className="text-yellow-300 font-bold">—</Text>
+          <Text className="text-yellow-300 text-lg font-semibold">
+            {formatTime(selectedDay?.close || null)}
+          </Text>
         </View>
-      </Modal>
+      )}
+
+      <TouchableOpacity
+        onPress={() => setSelectedDay(null)}
+        className="mt-10 bg-yellow-400 rounded-xl py-2 px-6 "
+      >
+        <Text className="text-black text-center font-bold text-lg">
+          إغلاق
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 }

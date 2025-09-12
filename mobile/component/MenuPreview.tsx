@@ -134,7 +134,8 @@ export default function MenuPreview() {
         onRequestClose={() => setSelectedFood(null)}
       >
         <View className="flex-1 bg-black/60 justify-center items-center">
-          <View className="bg-black/90 border border-yellow-400/30 rounded-3xl p-6 w-4/5">
+          <View className="bg-black border border-yellow-400 rounded-3xl p-6 "
+            style={{ width: "75%" }}>
             <Image
               source={{ uri: getImageUri(selectedFood?.image) }}
               className="w-full h-56 rounded-2xl mb-4"
@@ -155,7 +156,7 @@ export default function MenuPreview() {
 
             <TouchableOpacity
               onPress={() => selectedFood && addToCart(selectedFood)}
-              className="mt-2 bg-yellow-500 rounded-xl py-2 px-6"
+              className="mt-2 bg-yellow-400 rounded-xl py-2 px-6"
             >
               <Text className="text-black text-center font-bold text-lg">
                 إضافة إلى السلة

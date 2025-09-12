@@ -16,7 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 // Import a finger icon
-import FingerIcon from "../../assets/tap.png"; // adjust path
+import FingerIcon from "../../assets/tap.png";
 
 interface VideoItem {
   _id: string;
@@ -150,8 +150,8 @@ export default function VideosMobile() {
                 width: 50,
                 height: 50,
                 position: "absolute",
-                top: (height - 50) / 2, // center vertically
-                left: (width - 50) / 2, // center horizontally
+                top: (height - 50) / 2, 
+                left: (width - 50) / 2, 
                 opacity: 0.8,
                 ...fingerStyle,
               }}
