@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, Linking, TouchableOpacity, ScrollView, Image, Modal, Pressable } from "react-native";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
-
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 // Replace with your TikTok asset path
-import TikTokIcon from "../assets/tiktok.png"; // adjust path if needed
 
 export default function ContactUs() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -51,7 +50,7 @@ export default function ContactUs() {
 
         <View style={{ flexDirection: "row", marginTop: 10, gap: 20 }}>
           <TouchableOpacity onPress={() => openLink("https://www.tiktok.com/@ttyab_alawras05")}>
-            <Image source={TikTokIcon} style={{ width: 30, height: 30 }} />
+            <FontAwesome5 name="tiktok" size={30} color="#FFF" />          
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => openLink("https://www.instagram.com/tteyab_elawras05/")}>

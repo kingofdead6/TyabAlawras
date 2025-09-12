@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Dimensions, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { Video } from "expo-av";
 import axios from "axios";
@@ -14,9 +20,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from "react-native-reanimated";
-
-// Import a finger icon
-import FingerIcon from "../../assets/tap.png";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface VideoItem {
   _id: string;
@@ -33,7 +37,7 @@ export default function VideosMobile() {
   const { width, height } = Dimensions.get("window");
   const cardHeight = height * 0.7;
 
-  // Reanimated shared value
+  // Reanimated shared value for finger animation
   const fingerY = useSharedValue(0);
 
   useEffect(() => {
@@ -62,19 +66,21 @@ export default function VideosMobile() {
     }
   };
 
-  // Run finger animation on mount
+  // Finger animation effect
   useEffect(() => {
     if (showFinger) {
       fingerY.value = withRepeat(
-        withTiming(-40, { duration: 600, easing: Easing.inOut(Easing.ease) }),
-        4, // up and down twice
+        withTiming(-20, { duration: 600, easing: Easing.inOut(Easing.ease) }),
+        3,
         true,
-        () => runOnJS(setShowFinger)(false)
+        () => {
+          fingerY.value = 0;
+          runOnJS(setShowFinger)(false); // ✅ Safe in Expo Go
+        }
       );
     }
   }, []);
 
-  // Animated style for the finger
   const fingerStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: fingerY.value }],
   }));
@@ -141,28 +147,30 @@ export default function VideosMobile() {
               </View>
             )}
           />
-
-          {/* Finger scrolling hint */}
-          {showFinger && (
-            <Animated.Image
-              source={FingerIcon}
-              style={{
-                width: 50,
-                height: 50,
-                position: "absolute",
-                top: (height - 50) / 2, 
-                left: (width - 50) / 2, 
-                opacity: 0.8,
-                ...fingerStyle,
-              }}
-            />
-          )}
         </View>
       ) : (
         <Text style={{ color: "#9CA3AF", textAlign: "center", marginTop: 50 }}>
           لا توجد فيديوهات في المعرض
         </Text>
       )}
+
+      {/* Finger hint overlay */}
+      {showFinger && (
+        <View style={styles.fingerWrapper}>
+          <Animated.View style={fingerStyle}>
+            <MaterialCommunityIcons name="gesture-tap" size={50} color="white" />
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  fingerWrapper: {
+    ...StyleSheet.absoluteFillObject, // Fill the screen
+    justifyContent: "center",
+    alignItems: "center",
+    pointerEvents: "none", // Allow touches to pass through
+  },
+});
