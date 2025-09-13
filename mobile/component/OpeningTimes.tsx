@@ -3,8 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  Modal,
   ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -25,7 +23,6 @@ interface WorkingSchedule {
 export default function OpeningTimes() {
   const [workingSchedule, setWorkingSchedule] = useState<WorkingSchedule[]>([]);
   const [error, setError] = useState<string>("");
-  const [selectedDay, setSelectedDay] = useState<WorkingSchedule | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isOffline, setIsOffline] = useState<boolean>(false);
 
@@ -70,11 +67,9 @@ export default function OpeningTimes() {
       });
       setWorkingSchedule(fullSchedule);
 
-      // ✅ Save for offline use
       await AsyncStorage.setItem("workingSchedule", JSON.stringify(fullSchedule));
     } catch (err: any) {
       setError("⚠️ لا يمكن الاتصال بالإنترنت. يتم عرض الأوقات المخزنة.");
-      // ✅ Load cached schedule
       const cached = await AsyncStorage.getItem("workingSchedule");
       if (cached) {
         setWorkingSchedule(JSON.parse(cached));
@@ -102,7 +97,7 @@ export default function OpeningTimes() {
         </Text>
       )}
 
-      <Text className="text-4xl font-bold text-yellow-400 text-center mt-8">
+      <Text className="text-4xl font-bold text-yellow-400 text-center mt-8 mb-6">
         أوقات العمل
       </Text>
 
@@ -120,80 +115,49 @@ export default function OpeningTimes() {
           contentContainerStyle={{ paddingHorizontal: 10 }}
         >
           {workingSchedule.map((item, i) => (
-            <TouchableOpacity
+            <Animated.View
               key={item._id}
-              onPress={() => setSelectedDay(item)}
+              entering={FadeInUp.delay(i * 100).duration(600)}
+              className="bg-black/40 border border-yellow-400 rounded-3xl p-5 m-2 min-w-[140px] items-center justify-center shadow-lg"
             >
-              <Animated.View
-                entering={FadeInUp.delay(i * 100).duration(600)}
-                className="bg-black/40 border border-yellow-400 rounded-3xl p-5 m-2 min-w-[100px] flex items-center justify-center shadow-lg"
-              >
-                {item.isClosed ? (
-                  <Feather
-                    name="x-circle"
-                    size={28}
-                    color="#f87171"
-                    style={{ marginBottom: 8 }}
-                  />
-                ) : (
-                  <Feather
-                    name="calendar"
-                    size={28}
-                    color="#facc15"
-                    style={{ marginBottom: 8 }}
-                  />
-                )}
-                <Text className="text-base font-bold text-white">
-                  {item.day}
-                </Text>
-              </Animated.View>
-            </TouchableOpacity>
+              {item.isClosed ? (
+                <Feather
+                  name="x-circle"
+                  size={28}
+                  color="#f87171"
+                  style={{ marginBottom: 6 }}
+                />
+              ) : (
+                <Feather
+                  name="calendar"
+                  size={28}
+                  color="#facc15"
+                  style={{ marginBottom: 6 }}
+                />
+              )}
+              <Text className="text-base font-bold text-white mb-2">
+                {item.day}
+              </Text>
+
+              {item.isClosed ? (
+                <Text className="text-red-400 font-semibold">مغلق</Text>
+              ) : (
+                <View className="items-center">
+                  <Text className="text-yellow-300 text-sm font-semibold">
+                    {formatTime(item.open)}
+                  </Text>
+                  <Text className="text-yellow-300 text-sm font-semibold">
+                    —
+                  </Text>
+                  <Text className="text-yellow-300 text-sm font-semibold">
+                    {formatTime(item.close)}
+                  </Text>
+                </View>
+              )}
+            </Animated.View>
           ))}
         </ScrollView>
       )}
-
-      {/* Popup Modal */}
-      <Modal
-  transparent
-  visible={!!selectedDay}
-  animationType="fade"
-  onRequestClose={() => setSelectedDay(null)}
->
-  <View className="flex-1 bg-black/60 justify-center items-center">
-    <View
-      className="bg-black border border-yellow-400 rounded-3xl p-6"
-      style={{ minWidth: 200, width: '10%' }}
-    >
-      <Text className="text-2xl text-yellow-400 font-bold text-center mb-4">
-        {selectedDay?.day}
-      </Text>
-
-      {selectedDay?.isClosed ? (
-        <Text className="text-red-400 text-lg text-center">مغلق</Text>
-      ) : (
-        <View className="flex-col items-center">
-          <Text className="text-yellow-300 text-lg font-semibold">
-            {formatTime(selectedDay?.open || null)}
-          </Text>
-          <Text className="text-yellow-300 font-bold">—</Text>
-          <Text className="text-yellow-300 text-lg font-semibold">
-            {formatTime(selectedDay?.close || null)}
-          </Text>
-        </View>
-      )}
-
-      <TouchableOpacity
-        onPress={() => setSelectedDay(null)}
-        className="mt-10 bg-yellow-400 rounded-xl py-2 px-6 "
-      >
-        <Text className="text-black text-center font-bold text-lg">
-          إغلاق
-        </Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
-
     </View>
   );
 }

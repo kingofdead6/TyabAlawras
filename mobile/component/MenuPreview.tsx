@@ -164,7 +164,7 @@ export default function MenuPreview() {
             </TouchableOpacity>
 
             {popupMessage !== "" && (
-              <Text className="text-green-400 text-center mt-2 text-sm">{popupMessage}</Text>
+                <Text className="text-white font-semibold text-center">{popupMessage}</Text>
             )}
 
             <TouchableOpacity
