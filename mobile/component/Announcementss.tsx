@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, FlatList, Dimensions } from "react-native";
+import { View, Text, Image, FlatList, Dimensions, ActivityIndicator } from "react-native";
 import axios from "axios";
 import { API_BASE_URL } from "../api";
 import Animated, { FadeInUp } from "react-native-reanimated";
@@ -98,9 +98,9 @@ export default function Announcementss() {
           {error}
         </Text>
       ) : loading ? (
-        <Text className="text-gray-400 text-center mt-10">
-          جارٍ التحميل...
-        </Text>
+        <View className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color="#facc15" />
+        </View>
       ) : announcements.length > 0 ? (
         <FlatList
           data={announcements}

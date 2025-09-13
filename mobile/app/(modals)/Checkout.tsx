@@ -61,15 +61,19 @@ export default function Checkout() {
     };
     fetchCart();
 
-    // Load saved customer info
+    // Load saved customer info (without area)
     const loadForm = async () => {
       const savedForm = await AsyncStorage.getItem("checkoutForm");
       if (savedForm) {
-        setForm(JSON.parse(savedForm));
+        const parsed = JSON.parse(savedForm);
+        setForm({ ...parsed, area: "" });
+        setDeliveryFee(0);
+        setTotal(subtotal);
       }
     };
+
     loadForm();
-  }, [deliveryFee]);
+  }, [subtotal]); // Update dependency to reflect subtotal changes
 
   const fetchAreas = async () => {
     try {
@@ -82,16 +86,17 @@ export default function Checkout() {
 
   const handleChange = async (name: keyof FormData, value: string) => {
     const updatedForm = { ...form, [name]: value };
-    setForm(updatedForm);
-
-    // Save form automatically (without delivery fee)
-    await AsyncStorage.setItem("checkoutForm", JSON.stringify(updatedForm));
 
     if (name === "area") {
       const selectedArea = areas.find((a) => a._id === value);
       const fee = selectedArea ? selectedArea.price : 0;
       setDeliveryFee(fee);
       setTotal(subtotal + fee);
+      setForm({ ...updatedForm, area: value }); // Keep area in form state for submission
+    } else {
+      setForm(updatedForm);
+      // Save everything except area to AsyncStorage
+      await AsyncStorage.setItem("checkoutForm", JSON.stringify({ ...updatedForm, area: "" }));
     }
   };
 
@@ -123,6 +128,8 @@ export default function Checkout() {
       console.log("Order response:", response.data);
 
       await AsyncStorage.removeItem("cart");
+      // Clear saved form data except area
+      await AsyncStorage.setItem("checkoutForm", JSON.stringify({ name: form.name, phone: form.phone, address: form.address, notes: form.notes, area: "" }));
 
       setShowPopup(true);
       setTimeout(() => {

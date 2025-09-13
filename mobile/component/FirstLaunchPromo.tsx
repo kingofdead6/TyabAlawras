@@ -4,12 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 import DelieveryPic from "../assets/delievery.png";
 
 export default function FirstLaunchPromo() {
-  const [show, setShow] = useState<boolean>(true); 
+  const [show, setShow] = useState<boolean>(true);
   const { width, height } = Dimensions.get("window");
 
   const handleContinue = () => {
     setShow(false);
-
   };
 
   if (!show) return null;
@@ -24,7 +23,7 @@ export default function FirstLaunchPromo() {
         height,
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 999, 
+        zIndex: 999,
       }}
     >
       {/* Background Image */}

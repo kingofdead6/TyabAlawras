@@ -106,7 +106,6 @@ export default function OpeningTimes() {
       {loading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#facc15" />
-          <Text className="text-gray-400 mt-3">جارٍ التحميل...</Text>
         </View>
       ) : (
         <ScrollView
