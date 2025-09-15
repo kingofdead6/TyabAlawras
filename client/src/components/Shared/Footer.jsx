@@ -174,7 +174,7 @@ export default function Footer() {
 
                 <div className="flex items-center">
                   <a
-                    href="/download.html"
+                    href="https://github.com/kingofdead6/TyabAlawras/download.html"
                     className="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
                   >
                     حمل التطبيق
