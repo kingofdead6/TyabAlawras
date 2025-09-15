@@ -22,6 +22,7 @@ import Checkout from "./components/Home/Checkout";
 import AdminDeliveryAreas from "./components/Admin/AdminDeliveryAreas";
 import OrderConfirmation from "./components/Home/OrderConfirmation";
 import AdminVideos from "./components/Admin/AdminVideos";
+import LinkTree from "./Pages/LinkTree";
 
 export default function App() {
 
@@ -49,6 +50,7 @@ export default function App() {
               <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
               <Route path="/admin/videos" element={<AdminVideos />} />
             </Route>
+          <Route path="/linktree" element={<LinkTree />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

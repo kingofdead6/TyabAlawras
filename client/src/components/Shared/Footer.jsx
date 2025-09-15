@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaInstagram, FaEnvelope, FaPhone, FaTiktok } from "react-icons/fa";
+import { FaInstagram, FaEnvelope, FaPhone, FaTiktok, FaFacebook, FaYoutube, FaWhatsapp } from "react-icons/fa";
 import axios from "axios";
 import { API_BASE_URL } from "../../../api";
 import { useNavigate } from "react-router-dom";
@@ -157,30 +157,46 @@ export default function Footer() {
               <div className="flex flex-col md:flex-row justify-between items-start gap-6 text-sm">
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-4 mb-3">
-                    <a href="https://www.tiktok.com/@ttyab_alawras05" className="hover:text-yellow-400 transition">
+                    <a href="https://www.tiktok.com/@ttyab_alawras05"target="_blank" className="hover:text-yellow-400 transition">
                       <FaTiktok size={22} />
                     </a>
-                    <a href="https://www.instagram.com/tteyab_elawras05/" className="hover:text-yellow-400 transition">
+                    <a href="https://www.instagram.com/tteyab_elawras05/" target="_blank"className="hover:text-yellow-400 transition">
                       <FaInstagram size={22} />
                     </a>
+                    <a href="https://www.facebook.com/share/17VmU2KTS9/"target="_blank" className="hover:text-yellow-400 transition">
+                      <FaFacebook size={22} />
+                    </a>
+                    <a href="https://youtube.com/@ttyab_elawras"target="_blank" className="hover:text-yellow-400 transition">
+                      <FaYoutube size={22} />
+                    </a>
+                    <a
+                      href="https://wa.me/0654768883"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-yellow-400 transition"
+                    >
+                      <FaWhatsapp size={22} />
+                    </a>
+
+
                   </div>
                   <div className="flex items-center gap-2">
                     <FaEnvelope className="text-yellow-400" /> info@tyabalawras.com
                   </div>
-                  <div className="flex items-center gap-2">
-                    <FaPhone className="text-yellow-400" /> 0654768883
+                  <div className="flex items-center gap-2" >
+                    <FaPhone className="text-yellow-400" /> 0663733328
                   </div>
                 </div>
 
                 <div className="flex items-center">
                  <a
-  href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
->
-  حمل التطبيق
-</a>
+                   href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
+                 >
+                   حمل التطبيق
+                 </a>
 
                 </div>
               </div>
