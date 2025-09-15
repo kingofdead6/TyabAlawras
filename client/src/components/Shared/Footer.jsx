@@ -174,7 +174,7 @@ export default function Footer() {
 
                 <div className="flex items-center">
                   <a
-                    href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
+                    href="tyab-alawras.vercel.app/download.html"
                     className="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
                   >
                     حمل التطبيق
@@ -186,7 +186,7 @@ export default function Footer() {
 
           {/* Bottom Line */}
           <div className="mt-8 border-t border-gray-700 pt-4 text-center text-xs text-gray-400 hover:text-yellow-400 transition">
-            © 2025 طياب الأورا
+            © 2025 طياب الأوراس - جميع الحقوق محفوظة
           </div>
         </div>
       </motion.footer>
