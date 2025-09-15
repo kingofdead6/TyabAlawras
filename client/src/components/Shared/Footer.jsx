@@ -173,12 +173,15 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-center">
-                  <a
-                    href="https://github.com/kingofdead6/TyabAlawras/download.html"
-                    className="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
-                  >
-                    حمل التطبيق
-                  </a>
+                 <a
+  href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
+>
+  حمل التطبيق
+</a>
+
                 </div>
               </div>
             </div>
