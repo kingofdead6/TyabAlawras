@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import DelieveryPic from "../assets/delievery.png";
 
 export default function FirstLaunchPromo() {
   const [show, setShow] = useState<boolean>(true);
@@ -28,7 +27,7 @@ export default function FirstLaunchPromo() {
     >
       {/* Background Image */}
       <Image
-        source={DelieveryPic}
+        source={{uri: "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1757617285/20250911_1956_Speedy_City_Delivery_simple_compose_01k4x21frkfwdtt18mjv74qsxt_hjt3c1.png"}}
         style={{
           position: "absolute",
           width,

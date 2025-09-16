@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_BASE_URL } from "../../../api";
-
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState("today"); // default: اليوم
+  const [filter, setFilter] = useState("today");
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [timeError, setTimeError] = useState("");
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -17,7 +23,7 @@ export default function AdminOrders() {
 
   useEffect(() => {
     applyFilter();
-  }, [orders, filter]);
+  }, [orders, filter, selectedDay, startTime, endTime]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -28,53 +34,157 @@ export default function AdminOrders() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // sort newest first
       const sorted = (response.data || []).sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
       setOrders(sorted);
+      console.log("Fetched orders:", sorted);
     } catch (err) {
-      toast.error("خطأ في جلب الطلبات");
+      console.error("Fetch orders error:", err);
+      toast.error("خطأ في جلب الطلبات", {
+        style: { background: "#fff", color: "#1a1a1a", borderRadius: "8px", border: "1px solid #e5e7eb" },
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const parseTime = (timeStr) => {
+    if (!timeStr) return null;
+    timeStr = timeStr.trim().toLowerCase();
+    
+    // Handle formats like "8:00", "8:00 am", "8:00 ص", "14:30", "2:00 pm", "2:00 م"
+    const timeRegex = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm|ص|م)?$/i;
+    const match = timeStr.match(timeRegex);
+    
+    if (!match) {
+      setTimeError("تنسيق الوقت غير صحيح. استخدم مثل: 8:00 ص أو 14:30");
+      return null;
+    }
+
+    let [_, hours, minutes, period] = match;
+    hours = parseInt(hours);
+    minutes = parseInt(minutes) || 0;
+
+    if (hours > 23 || minutes > 59) {
+      setTimeError("الساعات يجب أن تكون بين 0-23 والدقائق بين 0-59");
+      return null;
+    }
+
+    if (period === "pm" || period === "م") {
+      if (hours !== 12) hours += 12;
+    } else if ((period === "am" || period === "ص") && hours === 12) {
+      hours = 0;
+    }
+
+    setTimeError("");
+    return hours * 60 + minutes;
   };
 
   const applyFilter = () => {
     const now = new Date();
     let filtered = orders;
 
+    let startMinutes = 0;
+    let endMinutes = 24 * 60;
+    let timeFilterValid = true;
+
+    const needsTimeFilter = filter === "today" || (filter === "week" && selectedDay) || (filter === "month" && selectedDay);
+    if (needsTimeFilter && (startTime || endTime)) {
+      if (startTime) {
+        const sm = parseTime(startTime);
+        if (sm === null) {
+          timeFilterValid = false;
+        } else {
+          startMinutes = sm;
+        }
+      }
+      if (endTime) {
+        const em = parseTime(endTime);
+        if (em === null) {
+          timeFilterValid = false;
+        } else {
+          endMinutes = em;
+        }
+      }
+      if (!timeFilterValid) {
+        setFilteredOrders([]);
+        return;
+      }
+    }
+
+    const applyTimeFilter = (orderTime) => {
+      return orderTime >= startMinutes && orderTime <= endMinutes;
+    };
+
     if (filter === "today") {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       filtered = orders.filter((order) => {
         const created = new Date(order.createdAt);
-        return (
-          created.getDate() === now.getDate() &&
-          created.getMonth() === now.getMonth() &&
-          created.getFullYear() === now.getFullYear()
-        );
+        const createdDay = new Date(created.getFullYear(), created.getMonth(), created.getDate());
+        if (createdDay.getTime() !== today.getTime()) return false;
+
+        if (startTime || endTime) {
+          const orderTime = created.getHours() * 60 + created.getMinutes();
+          return applyTimeFilter(orderTime);
+        }
+        return true;
       });
     } else if (filter === "week") {
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+      let startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - 7);
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      let endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
 
       filtered = orders.filter((order) => {
         const created = new Date(order.createdAt);
-        return created >= startOfWeek && created <= endOfWeek;
+        if (created < startOfWeek || created > endOfWeek) return false;
+
+        if (selectedDay) {
+          const createdDay = new Date(created.getFullYear(), created.getMonth(), created.getDate());
+          const selectedDayNorm = new Date(selectedDay.getFullYear(), selectedDay.getMonth(), selectedDay.getDate());
+          if (createdDay.getTime() !== selectedDayNorm.getTime()) return false;
+
+          if (startTime || endTime) {
+            const orderTime = created.getHours() * 60 + created.getMinutes();
+            return applyTimeFilter(orderTime);
+          }
+          return true;
+        }
+        return true;
       });
     } else if (filter === "month") {
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
       filtered = orders.filter((order) => {
         const created = new Date(order.createdAt);
-        return (
-          created.getMonth() === now.getMonth() &&
-          created.getFullYear() === now.getFullYear()
-        );
+        if (created < monthStart || created > monthEnd) return false;
+
+        if (selectedDay) {
+          const createdDay = new Date(created.getFullYear(), created.getMonth(), created.getDate());
+          const selectedDayNorm = new Date(selectedDay.getFullYear(), selectedDay.getMonth(), selectedDay.getDate());
+          if (createdDay.getTime() !== selectedDayNorm.getTime()) return false;
+
+          if (startTime || endTime) {
+            const orderTime = created.getHours() * 60 + created.getMinutes();
+            return applyTimeFilter(orderTime);
+          }
+          return true;
+        }
+        return true;
       });
+    } else if (filter === "all") {
+      filtered = orders;
     }
 
     setFilteredOrders(filtered);
+    console.log("Filtered orders:", filtered);
   };
 
   const updateStatus = async (id, status) => {
@@ -86,10 +196,19 @@ export default function AdminOrders() {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("تم تحديث الحالة");
-      fetchOrders();
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === id ? { ...order, status } : order
+        )
+      );
+      toast.success("تم تحديث الحالة", {
+        style: { background: "#fff", color: "#1a1a1a", borderRadius: "8px", border: "1px solid #e5e7eb" },
+      });
     } catch (err) {
-      toast.error("خطأ في التحديث");
+      console.error("Update status error:", err);
+      toast.error("خطأ في التحديث", {
+        style: { background: "#fff", color: "#1a1a1a", borderRadius: "8px", border: "1px solid #e5e7eb" },
+      });
     }
   };
 
@@ -104,71 +223,151 @@ export default function AdminOrders() {
     });
   };
 
+  const getWeekDays = () => {
+    const now = new Date();
+    let startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - 7);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+    startOfWeek.setHours(0, 0, 0, 0);
+    const days = [];
+    for (let i = 1; i <= 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  const weekDays = getWeekDays();
+
   return (
-    <div className="min-h-screen text-white py-12 px-4 pt-20">
+    <div className="min-h-screen text-white py-12 px-4 sm:px-6 lg:px-8 mt-20">
       <ToastContainer />
       <motion.div
-        className="max-w-6xl mx-auto"
+        className="max-w-7xl mx-auto space-y-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-3xl font-bold text-yellow-400 mb-6">
-          إدارة الطلبات
-        </h1>
+        <h1 className="text-4xl font-bold text-yellow-400">إدارة الطلبات</h1>
 
-        {/* فلاتر */}
-        <div className="flex gap-3 mb-6">
-          <button
-            onClick={() => setFilter("today")}
-            className={`cursor-pointer px-4 py-2 rounded-lg ${
-              filter === "today"
-                ? "bg-yellow-500"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            اليوم
-          </button>
-          <button
-            onClick={() => setFilter("week")}
-            className={`cursor-pointer px-4 py-2 rounded-lg ${
-              filter === "week"
-                ? "bg-yellow-500"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            هذا الأسبوع
-          </button>
-          <button
-            onClick={() => setFilter("month")}
-            className={`cursor-pointer px-4 py-2 rounded-lg ${
-              filter === "month"
-                ? "bg-yellow-500"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            هذا الشهر
-          </button>
-          <button
-            onClick={() => setFilter("all")}
-            className={`cursor-pointer px-4 py-2 rounded-lg ${
-              filter === "all"
-                ? "bg-yellow-500"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            الكل
-          </button>
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4">
+          {["today", "week", "month", "all"].map((f) => (
+            <button
+              key={f}
+              onClick={() => {
+                setFilter(f);
+                setSelectedDay(null);
+                setStartTime("");
+                setEndTime("");
+                setTimeError("");
+              }}
+              className={`cursor-pointer px-6 py-3 rounded-lg font-medium transition-colors ${
+                filter === f
+                  ? "bg-yellow-500 text-gray-900"
+                  : "bg-gray-700 hover:bg-gray-600"
+              }`}
+            >
+              {f === "today" && "اليوم"}
+              {f === "week" && "الأسبوع الماضي"}
+              {f === "month" && "هذا الشهر"}
+              {f === "all" && "الكل"}
+            </button>
+          ))}
         </div>
 
+        {/* Time Filters */}
+        {(filter === "today" || (filter === "week" && selectedDay) || (filter === "month" && selectedDay)) && (
+          <div className="flex flex-col sm:flex-row gap-6 max-w-md">
+            <div className="flex-1">
+              <label className="block text-gray-300 mb-2 text-lg">من الساعة:</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="cursor-pointer bg-gray-800 text-white p-3 rounded-lg border border-gray-600 focus:border-yellow-500 w-full"
+              />
+            </div>
+
+            <div className="flex-1">
+              <label className="block text-gray-300 mb-2 text-lg">إلى الساعة:</label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="cursor-pointer bg-gray-800 text-white p-3 rounded-lg border border-gray-600 focus:border-yellow-500 w-full"
+              />
+            </div>
+          </div>
+        )}
+        {timeError && (
+          <p className="text-red-400 text-center text-sm">{timeError}</p>
+        )}
+
+        {/* Week Days Selection */}
+        {filter === "week" && !selectedDay && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-yellow-400">اختر يومًا</h2>
+            <div className="flex flex-wrap gap-3">
+              {weekDays.map((day, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedDay(day)}
+                  className="cursor-pointer px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-lg"
+                >
+                  {day.toLocaleDateString("ar-DZ", {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+{filter === "month" && (
+  <div className="space-y-4">
+    <h2 className="text-xl font-semibold text-yellow-400">اختر يومًا</h2>
+    <button
+      onClick={() => setShowCalendar(true)}
+      className="cursor-pointer px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg transition-colors duration-200"
+    >
+      فتح التقويم
+    </button>
+
+    {showCalendar && (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className=" p-4 rounded-lg">
+          <button
+            onClick={() => setShowCalendar(false)}
+            className="cursor-pointer mb-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            إغلاق
+          </button>
+          <Calendar
+            value={selectedDay}
+            onChange={(date) => {
+              setSelectedDay(date);
+              setShowCalendar(false);
+            }}
+          />
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+
+
         {loading ? (
-          <p className="text-gray-400">جارٍ التحميل...</p>
+          <p className="text-gray-400 text-center text-lg">جارٍ التحميل...</p>
         ) : filteredOrders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOrders.map((order) => (
               <motion.div
                 key={order._id}
-                className="bg-gray-800 p-6 rounded-2xl shadow-lg shadow-yellow-400 hover:shadow-2xl"
+                className="bg-gray-800 p-6 rounded-2xl shadow-lg shadow-yellow-400/30 hover:shadow-yellow-400/50 transition-shadow"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 200 }}
               >
@@ -193,48 +392,44 @@ export default function AdminOrders() {
                   </span>
                 </p>
 
-                {/* أزرار الحالة */}
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   {order.status === "pending" && (
                     <>
                       <button
                         onClick={() => updateStatus(order._id, "in_delivery")}
-                        className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                        className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                       >
                         بدء التوصيل
                       </button>
                       <button
                         onClick={() => updateStatus(order._id, "cancelled")}
-                        className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                        className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                       >
                         إلغاء
                       </button>
                     </>
                   )}
-
                   {order.status === "in_delivery" && (
                     <>
                       <button
                         onClick={() => updateStatus(order._id, "delivered")}
-                        className="cursor-pointer px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg"
+                        className="cursor-pointer px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                       >
                         تم التوصيل
                       </button>
                       <button
                         onClick={() => updateStatus(order._id, "cancelled")}
-                        className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                        className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                       >
                         إلغاء
                       </button>
                     </>
                   )}
-
                   {order.status === "delivered" && (
                     <p className="col-span-2 text-center text-green-400 font-bold">
                       ✅ تم تسليم الطلب
                     </p>
                   )}
-
                   {order.status === "cancelled" && (
                     <p className="col-span-2 text-center text-red-400 font-bold">
                       ❌ تم إلغاء الطلب
@@ -257,7 +452,7 @@ export default function AdminOrders() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">لا توجد طلبات</p>
+          <p className="text-gray-400 text-center text-lg">لا توجد طلبات</p>
         )}
       </motion.div>
     </div>

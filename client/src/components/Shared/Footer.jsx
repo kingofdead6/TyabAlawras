@@ -154,7 +154,7 @@ export default function Footer() {
               {success && <p className="text-green-400 text-sm mb-4">{success}</p>}
 
               {/* Social + Contact Info */}
-              <div className="flex flex-col md:flex-row justify-between items-start gap-6 text-sm">
+    <div className="flex flex-col md:flex-row justify-center md:justify-between items-center md:items-start gap-6 text-sm w-full">
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-4 mb-3">
                     <a href="https://www.tiktok.com/@ttyab_alawras05"target="_blank" className="hover:text-yellow-400 transition">
@@ -190,8 +190,7 @@ export default function Footer() {
 
                 <div className="flex items-center">
                  <a
-                   href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
-                   target="_blank"
+                   href="https://tyab-elawras-app-y4av.vercel.app/TyabElawras.apk"
                    rel="noopener noreferrer"
                    class="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-600 transition font-semibold"
                  >

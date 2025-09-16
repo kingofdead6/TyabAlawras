@@ -8,22 +8,29 @@ import { API_BASE_URL } from "../../../api";
 
 export default function AdminMenu() {
   const [menuItems, setMenuItems] = useState([]);
-  const [form, setForm] = useState({ name: "", price: "", type: "", image: null });
+  const [form, setForm] = useState({ name: "", price: "", type: "", kind: "", image: null });
   const [editingId, setEditingId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("الكل");
+  const [selectedKind, setSelectedKind] = useState("الكل");
 
-  // Extract unique types dynamically
-  const types = ["الكل", ...new Set(menuItems.map((item) => item.type))];
+  // Define kind options for dropdown and filter
+  const kindOptions = ["الكل", "ماكولات سريعة", "مأكولات تقليدية", "مشاوي"];
 
-  // Filter menu items by search term and selected type
+  // Dynamic types based on selected kind
+  const types = selectedKind === "الكل"
+    ? ["الكل", ...new Set(menuItems.map((item) => item.type))]
+    : ["الكل", ...new Set(menuItems.filter((item) => item.kind === selectedKind).map((item) => item.type))];
+
+  // Filter menu items by search term, selected type, and selected kind
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === "الكل" || item.type === selectedType;
-    return matchesSearch && matchesType;
+    const matchesKind = selectedKind === "الكل" || item.kind === selectedKind;
+    return matchesSearch && matchesType && matchesKind;
   });
 
   useEffect(() => {
@@ -51,9 +58,11 @@ export default function AdminMenu() {
     if (!form.name) errors.name = "الاسم مطلوب";
     else if (form.name.length > 100) errors.name = "الاسم يجب أن يكون أقل من 100 حرف";
     if (!form.price) errors.price = "السعر مطلوب";
-    else if (!/^\d+(\.\d{1,2})?$/.test(form.price)) errors.price = "السعر يجب أن يكون رقمًا صالحًا";
+    else if (isNaN(form.price) || parseFloat(form.price) < 0) errors.price = "السعر يجب أن يكون رقمًا صالحًا أكبر من أو يساوي 0";
     if (!form.type) errors.type = "النوع مطلوب";
     else if (form.type.length > 50) errors.type = "النوع يجب أن يكون أقل من 50 حرف";
+    if (!form.kind) errors.kind = "الفئة مطلوبة";
+    else if (!kindOptions.slice(1).includes(form.kind)) errors.kind = "الفئة يجب أن تكون إحدى الخيارات المحددة";
     return errors;
   };
 
@@ -69,6 +78,7 @@ export default function AdminMenu() {
     formData.append("name", form.name);
     formData.append("price", form.price);
     formData.append("type", form.type);
+    formData.append("kind", form.kind);
     if (form.image) formData.append("image", form.image);
 
     try {
@@ -88,7 +98,7 @@ export default function AdminMenu() {
         toast.success("تم إضافة عنصر القائمة بنجاح!", { position: "top-right", autoClose: 3000 });
       }
 
-      setForm({ name: "", price: "", type: "", image: null });
+      setForm({ name: "", price: "", type: "", kind: kindOptions[1], image: null });
       setEditingId(null);
       setShowModal(false);
       setFormErrors({});
@@ -105,7 +115,13 @@ export default function AdminMenu() {
   };
 
   const handleEdit = (item) => {
-    setForm({ name: item.name, price: item.price.toString(), type: item.type, image: null });
+    setForm({ 
+      name: item.name, 
+      price: item.price.toString(), 
+      type: item.type, 
+      kind: item.kind || kindOptions[1], // Default to first non-"الكل" option if kind is empty
+      image: null 
+    });
     setEditingId(item._id);
     setShowModal(true);
   };
@@ -133,7 +149,7 @@ export default function AdminMenu() {
   };
 
   return (
-    <div className="min-h-screen text-white py-12 px-4 pt-20">
+    <div className="min-h-screen text-white py-12 px-4 mt-20">
       <ToastContainer />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -147,7 +163,7 @@ export default function AdminMenu() {
           <button
             onClick={() => {
               setEditingId(null);
-              setForm({ name: "", price: "", type: "", image: null });
+              setForm({ name: "", price: "", type: "", kind: kindOptions[1], image: null });
               setShowModal(true);
             }}
             className="cursor-pointer flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition"
@@ -156,7 +172,7 @@ export default function AdminMenu() {
           </button>
         </div>
 
-        {/* Search and Type Filters */}
+        {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="relative w-full max-w-md">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400" />
@@ -169,20 +185,42 @@ export default function AdminMenu() {
               dir="rtl"
             />
           </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            {types.map((type, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedType(type)}
-                className={`cursor-pointer px-4 py-2 rounded-full border transition ${
-                  selectedType === type
-                    ? "bg-yellow-400 text-black font-semibold"
-                    : "bg-transparent text-yellow-300 border-yellow-400 hover:bg-yellow-500 hover:text-black"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+          <div className="flex flex-col gap-4 w-full sm:w-auto">
+            {/* Kind Filters - Top */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {kindOptions.map((kind, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setSelectedKind(kind);
+                    setSelectedType("الكل"); 
+                  }}
+                  className={`cursor-pointer px-4 py-2 rounded-full border transition ${
+                    selectedKind === kind
+                      ? "bg-yellow-400 text-black font-semibold"
+                      : "bg-transparent text-yellow-300 border-yellow-400 hover:bg-yellow-500 hover:text-black"
+                  }`}
+                >
+                  {kind}
+                </button>
+              ))}
+            </div>
+            {/* Type Filters - Below, dynamic based on kind */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {types.map((type, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedType(type)}
+                  className={`cursor-pointer px-4 py-2 rounded-full border transition ${
+                    selectedType === type
+                      ? "bg-yellow-400 text-black font-semibold"
+                      : "bg-transparent text-yellow-300 border-yellow-400 hover:bg-yellow-500 hover:text-black"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -208,7 +246,7 @@ export default function AdminMenu() {
                 )}
                 <div className="p-4">
                   <h2 className="text-xl font-semibold text-yellow-400">{item.name}</h2>
-                  <p className="text-gray-300 mt-2">{item.price} د.ج - {item.type}</p>
+                  <p className="text-gray-300 mt-2">{item.price} د.ج - {item.type} ({item.kind})</p>
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => handleEdit(item)}
@@ -218,7 +256,7 @@ export default function AdminMenu() {
                     </button>
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="cursor-pointer p-2 bg-red-500 hover:bg-red-500 rounded-lg transition"
+                      className="cursor-pointer p-2 bg-red-500 hover:bg-red-600 rounded-lg transition"
                     >
                       <FaTrash />
                     </button>
@@ -267,7 +305,9 @@ export default function AdminMenu() {
                   <div>
                     <label className="block text-gray-200 mb-2">السعر (د.ج)</label>
                     <input
-                      type="text"
+                      type="number"
+                      step="0.01"
+                      min="0"
                       value={form.price}
                       onChange={(e) => setForm({ ...form, price: e.target.value })}
                       className={`w-full p-3 rounded-lg bg-gray-700 border ${
@@ -290,6 +330,26 @@ export default function AdminMenu() {
                     />
                     {formErrors.type && (
                       <p className="text-red-400 text-sm mt-1">{formErrors.type}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-gray-200 mb-2">الفئة</label>
+                    <select
+                      value={form.kind}
+                      onChange={(e) => setForm({ ...form, kind: e.target.value })}
+                      className={`cursor-pointer w-full p-3 rounded-lg bg-gray-700 border ${
+                        formErrors.kind ? "border-red-500" : "border-gray-600"
+                      } text-white`}
+                    >
+                      <option value="" disabled>اختر الفئة</option>
+                      {kindOptions.slice(1).map((option) => (
+                        <option key={option} value={option} className="cursor-pointer ">
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.kind && (
+                      <p className="text-red-400 text-sm mt-1">{formErrors.kind}</p>
                     )}
                   </div>
                   <div>

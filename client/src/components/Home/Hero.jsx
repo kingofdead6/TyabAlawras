@@ -73,7 +73,7 @@ export default function Hero() {
             <FaPhone /> تواصل معنا
           </a>
           <a
-            href="/app-download" // replace with actual link
+            href="https://tyab-elawras-app-y4av.vercel.app/TyabElawras.apk"
             className="hidden sm:flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-2xl hover:bg-green-700 font-semibold transition-colors"
           >
             <FaDownload /> تحميل التطبيق
@@ -84,7 +84,7 @@ export default function Hero() {
       {/* Mobile Download App Button (bottom of Hero only) */}
       <div className="sm:hidden absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 w-[90%]">
         <a
-          href="/app-download"
+          href="https://tyab-elawras-app-y4av.vercel.app/TyabElawras.apk"
           className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-2xl shadow-lg hover:bg-green-700 font-semibold transition-colors w-full"
         >
           <FaDownload /> تحميل التطبيق

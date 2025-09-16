@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, FlatList, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, Image, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_BASE_URL } from "../../api";
@@ -11,6 +11,7 @@ interface MenuItem {
   _id: string;
   name: string;
   type: string;
+  kind: string;
   price: number;
   image: string;
   quantity?: number;
@@ -21,6 +22,7 @@ export default function Menu() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [visible, setVisible] = useState<number>(12);
   const [selectedType, setSelectedType] = useState<string>("الكل");
+  const [selectedKind, setSelectedKind] = useState<string>("الكل");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -29,11 +31,29 @@ export default function Menu() {
   // store "added to cart" status for each item
   const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
 
-  const types = ["الكل", ...Array.from(new Set(menuItems.map((item) => item.type)))];
+  // Define kind options for filter
+  const kindOptions = ["الكل", "ماكولات سريعة", "مأكولات تقليدية", "مشاوي"];
+
+  // Compute kinds that have items
+  const availableKinds = kindOptions.filter((kind) => {
+    if (kind === "الكل") return true;
+    return menuItems.some((item) => item.kind === kind);
+  });
+
+  // Compute types based on selected kind, only including types with items
+  const filteredItemsForTypes = menuItems.filter((item) =>
+    selectedKind === "الكل" || item.kind === selectedKind
+  );
+  const types = ["الكل", ...Array.from(new Set(filteredItemsForTypes.map((item) => item.type)))].filter((type) => {
+    if (type === "الكل") return true;
+    return filteredItemsForTypes.some((item) => item.type === type);
+  });
+
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === "الكل" || item.type === selectedType;
-    return matchesSearch && matchesType;
+    const matchesKind = selectedKind === "الكل" || item.kind === selectedKind;
+    return matchesSearch && matchesType && matchesKind;
   });
 
   useEffect(() => {
@@ -45,6 +65,10 @@ export default function Menu() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    setSelectedType("الكل"); 
+  }, [selectedKind]);
 
   const fetchMenuItems = async () => {
     setLoading(true);
@@ -103,7 +127,7 @@ export default function Menu() {
       )}
 
       <Text className="text-lg font-bold text-white text-center">{item.name}</Text>
-      <Text className="text-yellow-400 mt-1 font-semibold">{item.price} د.ج</Text>
+      <Text className="text-yellow-400 mt-1 font-semibold">{item.price} د.ج - {item.kind}</Text>
 
       <TouchableOpacity
         onPress={() => addToCart(item)}
@@ -131,42 +155,72 @@ export default function Menu() {
         placeholderTextColor="#aaa"
         value={searchTerm}
         onChangeText={setSearchTerm}
-        className="bg-zinc-800 text-white p-3 rounded-lg mb-4 border border-yellow-400/40"
+        className="bg-zinc-800 text-white p-3 rounded-lg mb-6 border border-yellow-400/40"
       />
 
+      {/* Kind Filters */}
       <FlatList
         horizontal
-        data={types}
-        keyExtractor={(type, i) => i.toString()}
+        data={availableKinds}
+        keyExtractor={(kind, i) => i.toString()}
         showsHorizontalScrollIndicator={false}
-        renderItem={({ item: type }) => (
+        renderItem={({ item: kind }) => (
           <TouchableOpacity
             onPress={() => {
-              setSelectedType(type);
+              setSelectedKind(kind);
               setVisible(12);
             }}
             className={`px-4 py-2 rounded-full border m-1 ${
-              selectedType === type ? "bg-yellow-400" : "border-yellow-400"
+              selectedKind === kind ? "bg-yellow-400" : "border-yellow-400"
             }`}
           >
             <Text
               className={`font-semibold ${
-                selectedType === type ? "text-black" : "text-yellow-300"
+                selectedKind === kind ? "text-black" : "text-yellow-300"
               }`}
             >
-              {type}
+              {kind}
             </Text>
           </TouchableOpacity>
         )}
-        className="-mb-4"
+        contentContainerStyle={{ marginBottom: 16 }}
       />
+
+      {/* Type Filters - Only shown when a kind is selected */}
+      {selectedKind !== "الكل" && (
+        <FlatList
+          horizontal
+          data={types}
+          keyExtractor={(type, i) => i.toString()}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item: type }) => (
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedType(type);
+                setVisible(12);
+              }}
+              className={`px-4 py-2 rounded-full border m-1 ${
+                selectedType === type ? "bg-yellow-400" : "border-yellow-400"
+              }`}
+            >
+              <Text
+                className={`font-semibold ${
+                  selectedType === type ? "text-black" : "text-yellow-300"
+                }`}
+              >
+                {type}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 
   return (
     <View className="flex-1 bg-black">
       {loading ? (
-        <Text className="text-gray-400 text-center mt-10">جارٍ التحميل...</Text>
+          <ActivityIndicator size="large" color="#facc15" />
       ) : filteredMenuItems.length > 0 ? (
         <FlatList
           data={filteredMenuItems.slice(0, visible)}

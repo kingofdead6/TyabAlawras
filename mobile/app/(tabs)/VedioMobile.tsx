@@ -5,6 +5,7 @@ import {
   Dimensions,
   ActivityIndicator,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { Video } from "expo-av";
@@ -21,10 +22,12 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface VideoItem {
   _id: string;
   video: string;
+  createdAt?: string;
 }
 
 export default function VideosMobile() {
@@ -32,12 +35,15 @@ export default function VideosMobile() {
   const [loading, setLoading] = useState<boolean>(false);
   const [isOffline, setIsOffline] = useState<boolean>(false);
   const [showFinger, setShowFinger] = useState<boolean>(true);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [pausedMap, setPausedMap] = useState<Record<string, boolean>>({});
 
   const carouselRef = useRef<any>(null);
+  const videoRefs = useRef<(Video | null)[]>([]);
   const { width, height } = Dimensions.get("window");
-  const cardHeight = height * 0.7;
+  const cardHeight = height * 0.9;
 
-  // Reanimated shared value for finger animation
+  // animation
   const fingerY = useSharedValue(0);
 
   useEffect(() => {
@@ -47,7 +53,15 @@ export default function VideosMobile() {
 
     fetchVideos();
 
-    return () => unsubscribe();
+    return () => {
+      setPausedMap({});
+      videoRefs.current.forEach((ref) => {
+        if (ref) {
+          ref.stopAsync?.();
+        }
+      });
+      unsubscribe();
+    };
   }, []);
 
   const fetchVideos = async () => {
@@ -55,18 +69,63 @@ export default function VideosMobile() {
     try {
       const response = await axios.get<VideoItem[]>(`${API_BASE_URL}/videos`);
       const data = response.data || [];
-      setVideos(data);
-      await AsyncStorage.setItem("videos", JSON.stringify(data));
+      const sortedData = data.sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return b._id.localeCompare(a._id);
+      });
+      setVideos(sortedData);
+      await AsyncStorage.setItem("videos", JSON.stringify(sortedData));
+      setPausedMap(
+        sortedData.reduce(
+          (acc, item, idx) => ({ ...acc, [item._id]: idx !== 0 }),
+          {}
+        )
+      );
     } catch (err) {
       console.error("Fetch videos error:", err);
       const cached = await AsyncStorage.getItem("videos");
-      if (cached) setVideos(JSON.parse(cached));
+      if (cached) {
+        const cachedData = JSON.parse(cached);
+        const sortedCachedData = cachedData.sort((a: VideoItem, b: VideoItem) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          return b._id.localeCompare(a._id);
+        });
+        setVideos(sortedCachedData);
+        setPausedMap(
+          sortedCachedData.reduce(
+            (acc: VideoItem, idx: number) => ({
+              ...acc,
+              [cachedData[idx]._id]: idx !== 0,
+            }),
+            {}
+          )
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Finger animation effect
+  // update play state on active index change
+  useEffect(() => {
+    if (videos.length === 0) return;
+    setPausedMap(
+      videos.reduce(
+        (acc, item, idx) => ({ ...acc, [item._id]: idx !== activeIndex }),
+        {}
+      )
+    );
+  }, [activeIndex]);
+
+  const togglePlayPause = (videoId: string) => {
+    setPausedMap((prev) => ({ ...prev, [videoId]: !prev[videoId] }));
+  };
+
+  // Finger animation
   useEffect(() => {
     if (showFinger) {
       fingerY.value = withRepeat(
@@ -75,7 +134,7 @@ export default function VideosMobile() {
         true,
         () => {
           fingerY.value = 0;
-          runOnJS(setShowFinger)(false); // ✅ Safe in Expo Go
+          runOnJS(setShowFinger)(false);
         }
       );
     }
@@ -85,80 +144,71 @@ export default function VideosMobile() {
     transform: [{ translateY: fingerY.value }],
   }));
 
+  // Pause all videos when leaving the page
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        videoRefs.current.forEach((ref) => {
+          if (ref) {
+            ref.pauseAsync?.();
+          }
+        });
+      };
+    }, [])
+  );
+
   return (
-    <View style={{ flex: 1, backgroundColor: "black" }}>
+    <View style={styles.container} className="-mt-12">
       {isOffline && (
-        <Text style={{ color: "#F97316", textAlign: "center", padding: 8 }}>
+        <Text style={styles.offlineText}>
           📴 وضع عدم الاتصال — عرض الفيديوهات المخزنة
         </Text>
       )}
 
-      <Text
-        style={{
-          color: "#FACC15",
-          fontSize: 24,
-          textAlign: "center",
-          marginVertical: 10,
-        }}
-      >
-        معرض الفيديوهات
-      </Text>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#FACC15" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#FACC15" style={styles.loader} />
       ) : videos.length > 0 ? (
-        <View style={{ flex: 1 }}>
+        <View style={styles.carouselContainer}>
           <Carousel
             ref={carouselRef}
             vertical
             width={width}
-            height={cardHeight + 40}
+            height={cardHeight}
             data={videos}
             loop={false}
             scrollAnimationDuration={500}
             snapEnabled={true}
-            renderItem={({ item }) => (
-              <View
-                style={{
-                  width: width,
-                  height: cardHeight,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginVertical: 10,
-                }}
-              >
+            onSnapToItem={(index) => setActiveIndex(index)}
+            renderItem={({ item, index }) => (
+              <View style={styles.videoContainer}>
                 <Video
+                  ref={(ref) => (videoRefs.current[index] = ref)}
                   source={{
                     uri: item.video.startsWith("http")
                       ? item.video
                       : `${API_BASE_URL}/${item.video}`,
                   }}
-                  style={{
-                    width: width * 0.9,
-                    height: cardHeight,
-                    borderRadius: 16,
-                  }}
+                  style={styles.video}
                   resizeMode="cover"
                   isLooping
-                  shouldPlay
+                  shouldPlay={!pausedMap[item._id]}
                   isMuted={false}
-                  useNativeControls={false}
+                  useNativeControls
                 />
+                
               </View>
             )}
           />
         </View>
       ) : (
-        <Text style={{ color: "#9CA3AF", textAlign: "center", marginTop: 50 }}>
-          لا توجد فيديوهات في المعرض
-        </Text>
+        <Text style={styles.emptyText}>لا توجد فيديوهات في المعرض</Text>
       )}
 
-      {/* Finger hint overlay */}
       {showFinger && (
         <View style={styles.fingerWrapper}>
           <Animated.View style={fingerStyle}>
-            <MaterialCommunityIcons name="gesture-tap" size={50} color="white" />
+            <MaterialCommunityIcons name="gesture-swipe-up" size={50} color="white" />
           </Animated.View>
         </View>
       )}
@@ -167,10 +217,56 @@ export default function VideosMobile() {
 }
 
 const styles = StyleSheet.create({
-  fingerWrapper: {
-    ...StyleSheet.absoluteFillObject, // Fill the screen
+  container: { flex: 1, backgroundColor: "black" },
+  offlineText: {
+    color: "#F97316",
+    textAlign: "center",
+    padding: 8,
+    fontSize: 16,
+  },
+  headerText: {
+    color: "#FACC15",
+    fontSize: 24,
+    textAlign: "center",
+    marginVertical: 10,
+  },
+  loader: { flex: 1 },
+  carouselContainer: { flex: 1 },
+  videoContainer: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height * 0.9,
     justifyContent: "center",
     alignItems: "center",
-    pointerEvents: "none", // Allow touches to pass through
+  },
+  video: {
+    width: Dimensions.get("window").width * 0.9, // smaller video
+    height: Dimensions.get("window").height * 0.7, // reduced height
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  playPauseButton: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -20 }, { translateY: -20 }],
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 50,
+    padding: 10,
+  },
+  fingerWrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    pointerEvents: "none",
+  },
+  emptyText: {
+    color: "#9CA3AF",
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
   },
 });
