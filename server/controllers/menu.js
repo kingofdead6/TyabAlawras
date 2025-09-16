@@ -14,7 +14,7 @@ export const getMenuItems = asyncHandler(async (req, res) => {
 // Create a new menu item
 export const createMenuItem = asyncHandler(async (req, res) => {
   
-  const { name, price, type } = req.body;
+  const { name, price, type, kind } = req.body;
   const image = req.file;
 
   // Validate inputs
@@ -30,6 +30,10 @@ export const createMenuItem = asyncHandler(async (req, res) => {
   if (!validator.isLength(type, { min: 1, max: 50 })) {
     return res.status(400).json({ message: 'Type must be between 1 and 50 characters' });
   }
+  if (!validator.isLength(kind, { min: 1, max: 50 })) {
+    return res.status(400).json({ message: 'Kind must be between 1 and 50 characters' });
+  }
+
 
   let imageUrl = null;
   if (image) {
@@ -44,6 +48,7 @@ export const createMenuItem = asyncHandler(async (req, res) => {
     name,
     price: Number(price),
     type,
+    kind,
     image: imageUrl,
   });
   await menuItem.save();
@@ -54,7 +59,7 @@ export const createMenuItem = asyncHandler(async (req, res) => {
 // Update a menu item
 export const updateMenuItem = asyncHandler(async (req, res) => {
   
-  const { name, price, type } = req.body;
+  const { name, price, type , kind } = req.body;
   const image = req.file;
   const menuItem = await MenuItem.findById(req.params.id);
 
@@ -71,6 +76,9 @@ export const updateMenuItem = asyncHandler(async (req, res) => {
   }
   if (type && !validator.isLength(type, { min: 1, max: 50 })) {
     return res.status(400).json({ message: 'Type must be between 1 and 50 characters' });
+  }
+  if (kind && !validator.isLength(kind, { min: 1, max: 50 })) {
+    return res.status(400).json({ message: 'Kind must be between 1 and 50 characters' });
   }
 
   if (image) {
@@ -92,6 +100,7 @@ export const updateMenuItem = asyncHandler(async (req, res) => {
   menuItem.name = name || menuItem.name;
   menuItem.price = price ? Number(price) : menuItem.price;
   menuItem.type = type || menuItem.type;
+  menuItem.kind = kind || menuItem.kind;
   await menuItem.save();
 
   res.status(200).json({ message: 'Menu item updated successfully', menuItem });
