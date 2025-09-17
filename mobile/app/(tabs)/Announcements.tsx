@@ -13,8 +13,8 @@ export default function Announcements() {
       showsVerticalScrollIndicator={false}
     >
       <Announcementss />
-      <OpeningTimes />
       <MenuPreview />
+      <OpeningTimes />
       <GalleryMobile />
     </ScrollView>
   );

@@ -6,6 +6,7 @@ import { API_BASE_URL } from "../../api";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
+import { useLocalSearchParams } from "expo-router";
 
 interface MenuItem {
   _id: string;
@@ -19,10 +20,11 @@ interface MenuItem {
 
 export default function Menu() {
   const insets = useSafeAreaInsets();
+  const { selectedKind: initialKind } = useLocalSearchParams();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [visible, setVisible] = useState<number>(12);
   const [selectedType, setSelectedType] = useState<string>("الكل");
-  const [selectedKind, setSelectedKind] = useState<string>("الكل");
+  const [selectedKind, setSelectedKind] = useState<string>(initialKind ? String(initialKind) : "الكل");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

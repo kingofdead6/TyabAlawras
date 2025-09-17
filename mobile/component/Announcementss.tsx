@@ -86,7 +86,7 @@ export default function Announcementss() {
   );
 
   return (
-    <View className="bg-black py-8 -mt-5">
+    <View className="bg-black py-8 -mt-2 mb-8">
       {isOffline && (
         <Text className="text-orange-400 text-center mb-2">
           📴 وضع عدم الاتصال — عرض الإعلانات المخزنة
