@@ -48,11 +48,11 @@ export default function ContactUs() {
             alignItems: "center",
             marginBottom: 10,
           }}
-          onPress={() => openLink("mailto:info@tyabalawras.com")}
+          onPress={() => openLink("mailto:ttyabelawras@gmail.com")}
         >
           <Entypo name="mail" size={20} color="#FACC15" />
           <Text style={{ color: "#FFF", marginLeft: 10 }}>
-            info@tyabalawras.com
+            ttyabelawras@gmail.com
           </Text>
         </TouchableOpacity>
 

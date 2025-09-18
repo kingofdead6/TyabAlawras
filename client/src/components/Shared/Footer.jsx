@@ -181,7 +181,7 @@ export default function Footer() {
 
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaEnvelope className="text-yellow-400" /> info@tyabalawras.com
+                    <FaEnvelope className="text-yellow-400" /> ttyabelawras@gmail.com
                   </div>
                   <div className="flex items-center gap-2" >
                     <FaPhone className="text-yellow-400" /> 0663733328

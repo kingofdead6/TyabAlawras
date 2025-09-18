@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { API_BASE_URL } from "../../../api";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -16,20 +17,70 @@ export default function AdminOrders() {
   const [endTime, setEndTime] = useState("");
   const [timeError, setTimeError] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
+  const [ws, setWs] = useState(null);
 
   useEffect(() => {
     fetchOrders();
+    setupWebSocket();
+    
+    // Polling fallback every 30 seconds
+    const pollingInterval = setInterval(fetchOrders, 30000);
+    
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+      clearInterval(pollingInterval);
+    };
   }, []);
 
   useEffect(() => {
     applyFilter();
   }, [orders, filter, selectedDay, startTime, endTime]);
 
+  const setupWebSocket = () => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const websocket = new WebSocket(`${API_BASE_URL.replace('http', 'ws')}/ws/orders?token=${token}`);
+    
+    websocket.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    websocket.onmessage = (event) => {
+      try {
+        const newOrder = JSON.parse(event.data);
+        if (newOrder.type === "new_order") {
+          setOrders((prevOrders) => {
+            const updatedOrders = [newOrder.order, ...prevOrders].sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            toast.success("طلب جديد وصل!", {
+              style: { background: "#fff", color: "#1a1a1a", borderRadius: "8px", border: "1px solid #e5e7eb" },
+            });
+            return updatedOrders;
+          });
+        }
+      } catch (err) {
+        console.error("WebSocket message error:", err);
+      }
+    };
+
+    websocket.onclose = () => {
+      console.log("WebSocket disconnected, attempting to reconnect...");
+      setTimeout(setupWebSocket, 5000);
+    };
+
+    websocket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    setWs(websocket);
+  };
+
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await axios.get(`${API_BASE_URL}/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -54,7 +105,6 @@ export default function AdminOrders() {
     if (!timeStr) return null;
     timeStr = timeStr.trim().toLowerCase();
     
-    // Handle formats like "8:00", "8:00 am", "8:00 ص", "14:30", "2:00 pm", "2:00 م"
     const timeRegex = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm|ص|م)?$/i;
     const match = timeStr.match(timeRegex);
     
@@ -189,8 +239,7 @@ export default function AdminOrders() {
 
   const updateStatus = async (id, status) => {
     try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       await axios.put(
         `${API_BASE_URL}/orders/${id}`,
         { status },
@@ -326,39 +375,37 @@ export default function AdminOrders() {
             </div>
           </div>
         )}
-{filter === "month" && (
-  <div className="space-y-4">
-    <h2 className="text-xl font-semibold text-yellow-400">اختر يومًا</h2>
-    <button
-      onClick={() => setShowCalendar(true)}
-      className="cursor-pointer px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg transition-colors duration-200"
-    >
-      فتح التقويم
-    </button>
+        {filter === "month" && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-yellow-400">اختر يومًا</h2>
+            <button
+              onClick={() => setShowCalendar(true)}
+              className="cursor-pointer px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg transition-colors duration-200"
+            >
+              فتح التقويم
+            </button>
 
-    {showCalendar && (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className=" p-4 rounded-lg">
-          <button
-            onClick={() => setShowCalendar(false)}
-            className="cursor-pointer mb-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            إغلاق
-          </button>
-          <Calendar
-            value={selectedDay}
-            onChange={(date) => {
-              setSelectedDay(date);
-              setShowCalendar(false);
-            }}
-          />
-        </div>
-      </div>
-    )}
-  </div>
-)}
-
-
+            {showCalendar && (
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="p-4 rounded-lg">
+                  <button
+                    onClick={() => setShowCalendar(false)}
+                    className="cursor-pointer mb-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    إغلاق
+                  </button>
+                  <Calendar
+                    value={selectedDay}
+                    onChange={(date) => {
+                      setSelectedDay(date);
+                      setShowCalendar(false);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <p className="text-gray-400 text-center text-lg">جارٍ التحميل...</p>

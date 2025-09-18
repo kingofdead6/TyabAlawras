@@ -101,7 +101,7 @@ export default function FirstLaunchPromo() {
       <Image
         source={{
           uri: currentPage === 0
-            ? "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1757617285/20250911_1956_Speedy_City_Delivery_simple_compose_01k4x21frkfwdtt18mjv74qsxt_hjt3c1.png"
+            ? "https://res.cloinary.com/dtwa3lxdk/image/upload/v1757617285/20250911_1956_Speedy_City_Delivery_simple_compose_01k4x21frkfwdtt18mjv74qsxt_hjt3c1.png"
             : "https://res.cloudinary.com/dtwa3lxdk/image/upload/v1757978907/20250915_164946_wvkd7g.jpg",
         }}
         style={{
