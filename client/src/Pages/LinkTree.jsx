@@ -25,12 +25,20 @@ export default function LinkTree() {
         {/* Links */}
         <div className="flex flex-col gap-4">
           <a
-            href="https://www.youtube.com/@ttyab_elawras"
+            href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
             target="_blank"
             rel="noreferrer"
             className="flex items-center justify-center gap-2 bg-yellow-400 py-3 rounded-xl font-semibold hover:bg-yellow-600 transition"
           >
-            <FaYoutube size={22} /> YouTube
+            <FaDownload size={22} /> تحميل التطبيق
+          </a>
+          <a
+            href="https://www.facebook.com/share/17VmU2KTS9/"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-2 bg-yellow-400 py-3 rounded-xl font-semibold hover:bg-yellow-600 transition"
+          >
+            <FaFacebook size={22} /> Facebook
           </a>
           <a
             href="https://www.instagram.com/tteyab_elawras05/"
@@ -49,13 +57,16 @@ export default function LinkTree() {
             <FaTiktok size={22} /> TikTok
           </a>
           <a
-            href="https://www.facebook.com/share/17VmU2KTS9/"
+            href="https://www.youtube.com/@ttyab_elawras"
             target="_blank"
             rel="noreferrer"
             className="flex items-center justify-center gap-2 bg-yellow-400 py-3 rounded-xl font-semibold hover:bg-yellow-600 transition"
           >
-            <FaFacebook size={22} /> Facebook
+            <FaYoutube size={22} /> YouTube
           </a>
+          
+          
+          
           <a
             href="https://wa.me/213654768883"
             target="_blank"
@@ -72,14 +83,7 @@ export default function LinkTree() {
           >
             <FaGlobe size={22} /> الموقع الرسمي
           </a>
-          <a
-            href="https://github.com/kingofdead6/TyabAlawras/releases/download/v2.0.0/TyabElawras.apk"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-2 bg-yellow-400 py-3 rounded-xl font-semibold hover:bg-yellow-600 transition"
-          >
-            <FaDownload size={22} /> تحميل التطبيق
-          </a>
+          
         </div>
       </div>
     </div>

@@ -27,3 +27,30 @@ export const login = asyncHandler(async (req, res) => {
     res.status(401).json({ message: 'Invalid email or password' });
   }
 });
+
+export const registerSuperAdmin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  // Force usertype to superadmin
+  const usertype = 'superadmin';
+
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    return res.status(400).json({ message: 'User already exists' });
+  }
+
+  const user = await User.create({ email, password, usertype });
+
+  const token = jwt.sign(
+    { id: user._id, usertype: user.usertype },
+    process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+
+  res.status(201).json({
+    _id: user._id,
+    email: user.email,
+    usertype: user.usertype,
+    token,
+  });
+});
