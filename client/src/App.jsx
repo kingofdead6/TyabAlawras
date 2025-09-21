@@ -24,6 +24,7 @@ import OrderConfirmation from "./components/Home/OrderConfirmation";
 import AdminVideos from "./components/Admin/AdminVideos";
 import LinkTree from "./Pages/LinkTree";
 import FoodRating from "./components/Home/FoodRating";
+import AdminRating from "./components/Admin/AdminRating";
 
 export default function App() {
 
