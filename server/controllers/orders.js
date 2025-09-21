@@ -3,6 +3,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import validator from 'validator';
 import MenuItem from '../models/MenuItem.js';
 import DeliveryArea from '../models/DeliveryArea.js';
+import { broadcastNewOrder } from "../index.js";
 
 // Get all orders (admin only)
 export const getOrders = asyncHandler(async (req, res) => {
@@ -36,36 +37,51 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
 // Create a new order (public)
 export const createOrder = asyncHandler(async (req, res) => {
-  const { items, deliveryArea, deliveryFee, customerName, customerPhone, deliveryAddress, notes, subtotal } = req.body;
+  const {
+    items,
+    deliveryArea,
+    deliveryFee,
+    customerName,
+    customerPhone,
+    deliveryAddress,
+    notes,
+    subtotal,
+  } = req.body;
 
-  console.log('Creating order with data:', req.body);
+  console.log("Creating order with data:", req.body);
 
   if (!items || items.length === 0) {
-    return res.status(400).json({ message: 'Items are required' });
+    return res.status(400).json({ message: "Items are required" });
   }
-  if (!customerName || !validator.isLength(customerName, { min: 1, max: 100 })) {
-    return res.status(400).json({ message: 'Valid customer name is required' });
+  if (
+    !customerName ||
+    !validator.isLength(customerName, { min: 1, max: 100 })
+  ) {
+    return res.status(400).json({ message: "Valid customer name is required" });
   }
-  if (!customerPhone || !validator.isMobilePhone(customerPhone, 'ar-DZ')) {
-    return res.status(400).json({ message: 'Valid phone number is required' });
+  if (!customerPhone || !validator.isMobilePhone(customerPhone, "ar-DZ")) {
+    return res.status(400).json({ message: "Valid phone number is required" });
   }
-  if (!deliveryAddress || !validator.isLength(deliveryAddress, { min: 1, max: 200 })) {
-    return res.status(400).json({ message: 'Valid delivery address is required' });
+  if (
+    !deliveryAddress ||
+    !validator.isLength(deliveryAddress, { min: 1, max: 200 })
+  ) {
+    return res.status(400).json({ message: "Valid delivery address is required" });
   }
   if (!deliveryArea || deliveryFee === undefined) {
-    return res.status(400).json({ message: 'Delivery area and fee are required' });
+    return res.status(400).json({ message: "Delivery area and fee are required" });
   }
 
   const area = await DeliveryArea.findOne({ name: deliveryArea });
   if (!area) {
-    console.error('Delivery area not found:', deliveryArea);
-    return res.status(400).json({ message: 'Invalid delivery area' });
+    console.error("Delivery area not found:", deliveryArea);
+    return res.status(400).json({ message: "Invalid delivery area" });
   }
   const areaPrice = parseFloat(area.price.toFixed(2));
   const sentFee = parseFloat(deliveryFee.toFixed(2));
   if (areaPrice !== sentFee) {
-    console.error('Fee mismatch:', { areaPrice, sentFee });
-    return res.status(400).json({ message: 'Delivery fee does not match area' });
+    console.error("Fee mismatch:", { areaPrice, sentFee });
+    return res.status(400).json({ message: "Delivery fee does not match area" });
   }
 
   const populatedItems = [];
@@ -73,12 +89,14 @@ export const createOrder = asyncHandler(async (req, res) => {
   for (const itemData of items) {
     const menuItem = await MenuItem.findById(itemData.menuItem);
     if (!menuItem) {
-      console.error('Invalid menu item ID:', itemData.menuItem);
-      return res.status(400).json({ message: `Invalid menu item: ${itemData.menuItem}` });
+      console.error("Invalid menu item ID:", itemData.menuItem);
+      return res
+        .status(400)
+        .json({ message: `Invalid menu item: ${itemData.menuItem}` });
     }
     const itemPrice = Number(menuItem.price);
     if (isNaN(itemPrice) || itemPrice <= 0) {
-      return res.status(400).json({ message: 'Invalid menu item price' });
+      return res.status(400).json({ message: "Invalid menu item price" });
     }
     populatedItems.push({
       menuItem: menuItem._id,
@@ -89,7 +107,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   const finalSubtotal = subtotal ? Number(subtotal) : calculatedSubtotal;
   if (Math.abs(finalSubtotal - calculatedSubtotal) > 0.01) {
-    console.warn('Subtotal mismatch, using calculated:', calculatedSubtotal);
+    console.warn("Subtotal mismatch, using calculated:", calculatedSubtotal);
   }
 
   const totalAmount = finalSubtotal + sentFee;
@@ -104,14 +122,23 @@ export const createOrder = asyncHandler(async (req, res) => {
     customerPhone,
     deliveryAddress,
     notes,
-    paymentMethod: 'cash_on_delivery',
+    paymentMethod: "cash_on_delivery",
   });
 
   await order.save();
-  console.log('Order created successfully:', order._id);
+  console.log("✅ Order created successfully:", order._id);
 
-  const populatedOrder = await Order.findById(order._id).populate('items.menuItem', 'name price');
-  res.status(201).json({ message: 'Order created successfully', order: populatedOrder });
+  const populatedOrder = await Order.findById(order._id).populate(
+    "items.menuItem",
+    "name price"
+  );
+
+  // 🔔 Notify admins in real time
+  broadcastNewOrder(populatedOrder);
+
+  res
+    .status(201)
+    .json({ message: "Order created successfully", order: populatedOrder });
 });
 
 // Update order status (admin only)
