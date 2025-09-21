@@ -30,66 +30,73 @@ export default function TabsLayout() {
 
       {/* Tabs */}
       <Tabs
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            position: "absolute",
-            bottom: 40,
-            left: 70,
-            height: 60,
-            width: 300, 
-            borderRadius: 100,
-            borderWidth: 2,
-            borderColor: "#FACC15",
-            backgroundColor: "transparent",
-            overflow: "hidden",
-            justifyContent: "space-around",
-            flexDirection: "row",
-            marginLeft: 40,
-          },
-          tabBarBackground: () => (
-            <BlurView
-              intensity={120}
-              tint="dark"
-              style={{
-                flex: 1,
-                borderRadius: 100,
-              }}
-            />
-          ),
-          tabBarActiveTintColor: "#FACC15",
-          tabBarInactiveTintColor: "#9CA3AF",
-          tabBarIcon: ({ color, size }) => {
-            let iconName: keyof typeof Ionicons.glyphMap = "home-outline";
-            switch (route.name) {
-              case "Announcements":
-                iconName = "home-outline";
-                break;
-              case "Menu":
-                iconName = "restaurant-outline";
-                break;
-              case "VedioMobile":
-                iconName = "tv-outline";
-                break;
-              case "ShopLocationPage":
-                iconName = "location-outline";
-                break;
-            }
+  screenOptions={({ route }) => ({
+    headerShown: false,
+    tabBarShowLabel: false,
+    tabBarStyle: {
+      position: "absolute",
+      bottom: 40,
+      alignSelf: "center",
+      height: 60,
+      width: "100%",
+      borderRadius: 100,
+      borderWidth: 2,
+      borderColor: "#FACC15",
+      backgroundColor: "transparent",
+      overflow: "hidden",
+      flexDirection: "row",
+      justifyContent: "space-around",
+    },
+    tabBarBackground: () => (
+      <BlurView
+        intensity={120}
+        tint="dark"
+        style={{
+          flex: 1,
+          borderRadius: 100,
+        }}
+      />
+    ),
+    tabBarActiveTintColor: "#FACC15",
+    tabBarInactiveTintColor: "#9CA3AF",
+    tabBarIcon: ({ color, size }) => {
+      let iconName: keyof typeof Ionicons.glyphMap = "home-outline";
+      switch (route.name) {
+        case "Announcements":
+          iconName = "home-outline";
+          break;
+        case "Menu":
+          iconName = "restaurant-outline";
+          break;
+        case "VedioMobile":
+          iconName = "tv-outline";
+          break;
+        case "ShopLocationPage":
+          iconName = "location-outline";
+          break;
+      }
 
-            return (
-              <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }} className="-mb-4">
-                <Ionicons name={iconName} size={size + 4} color={color} />
-              </View>
-            );
-          },
-        })}
-      >
-        <Tabs.Screen name="Announcements" />
-        <Tabs.Screen name="Menu" />
-        <Tabs.Screen name="VedioMobile" />
-        <Tabs.Screen name="ShopLocationPage" />
-      </Tabs>
+      return (
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+          }}
+          className="-mb-4"
+        >
+          <Ionicons name={iconName} size={size + 4} color={color} />
+        </View>
+      );
+    },
+  })}
+>
+  <Tabs.Screen name="Announcements" />
+  <Tabs.Screen name="Menu" />
+  <Tabs.Screen name="VedioMobile" />
+  <Tabs.Screen name="ShopLocationPage" />
+</Tabs>
+
     </SafeAreaView>
   );
 }

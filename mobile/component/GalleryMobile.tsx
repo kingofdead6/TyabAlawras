@@ -85,27 +85,28 @@ export default function GalleryMobile() {
         />
       ) : galleryImages.length > 0 ? (
         <Carousel
-          loop
-          width={width}
-          height={250}
-          autoPlay
-          autoPlayInterval={0} // autoplay delay
-          data={galleryImages}
-          scrollAnimationDuration={3000}
-          renderItem={({ item }) => (
-            <View className="flex-1 px-2">
-              <Image
-                source={{
-                  uri: item.image.startsWith("http")
-                    ? item.image
-                    : `${API_BASE_URL}/${item.image}`,
-                }}
-                style={{ width: "90%", height: "100%", borderRadius: 12 }}
-                resizeMode="cover"
-              />
-            </View>
-          )}
-        />
+  loop
+  width={width}
+  height={250}
+  autoPlay
+  autoPlayInterval={3000}   // 3 sec delay between slides
+  scrollAnimationDuration={800} // smooth animation duration
+  data={galleryImages}
+  renderItem={({ item }) => (
+    <View className="flex-1 px-2">
+      <Image
+        source={{
+          uri: item.image.startsWith("http")
+            ? item.image
+            : `${API_BASE_URL}/${item.image}`,
+        }}
+        style={{ width: "90%", height: "100%", borderRadius: 12 }}
+        resizeMode="cover"
+      />
+    </View>
+  )}
+/>
+
       ) : (
         <Text className="text-gray-400 text-center mt-10">
           لا توجد صور في المعرض
