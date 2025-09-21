@@ -45,6 +45,7 @@ export default function App() {
               <Route path="/admin/gallery" element={<AdminGallery />} />
               <Route path="/admin/menu" element={<AdminMenu />} />
               <Route path="/admin/contact" element={<AdminContact />} />
+              <Route path="/admin/rating" element={<AdminRating />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/newsletter" element={<AdminNewsletter />} />
               <Route path="/admin/working-times" element={<AdminWorkingTimes />} />
