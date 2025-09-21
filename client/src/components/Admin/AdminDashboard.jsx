@@ -23,11 +23,6 @@ export default function AdminDashboard() {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    navigate("/login");
-  };
 
   const adminSections = [
     {
@@ -54,6 +49,11 @@ export default function AdminDashboard() {
       path: "/admin/contact",
       title: "إدارة الرسائل",
       description: "عرض الرسائل المرسلة",
+    },
+    {
+      path: "/admin/rating",
+      title: "إدارة التقييمات",
+      description: "عرض تقييمات الطعام",
     },
     {
       path: "/admin/newsletter",

@@ -23,6 +23,7 @@ import AdminDeliveryAreas from "./components/Admin/AdminDeliveryAreas";
 import OrderConfirmation from "./components/Home/OrderConfirmation";
 import AdminVideos from "./components/Admin/AdminVideos";
 import LinkTree from "./Pages/LinkTree";
+import FoodRating from "./components/Home/FoodRating";
 
 export default function App() {
 
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cart" element={<Cart /> }/>
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/rating" element={<FoodRating />} />
           <Route path="/order-confirmation" element={<OrderConfirmation /> }/>
             <Route element={<ProtectedRoute />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />

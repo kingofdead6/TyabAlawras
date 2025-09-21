@@ -14,6 +14,7 @@ import workingTimesRoutes from './routes/workingtimes.js';
 import orderRoutes from './routes/orders.js';
 import deliveryAreasRoutes from './routes/deliveryAreas.js';
 import videoRoutes from './routes/videos.js';
+import rateRoutes from './routes/rating.js';
 dotenv.config();
 
 const app = express();
@@ -36,6 +37,8 @@ app.use('/api/working-times', workingTimesRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/delivery-areas', deliveryAreasRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/rating', rateRoutes);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

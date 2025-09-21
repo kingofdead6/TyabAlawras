@@ -65,7 +65,7 @@ export default function Login() {
         className="w-full max-w-md bg-gray-900/70 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-xl"
       >
         <div className="text-center mb-6">
-          <div className="mx-auto w-20 h-20 rounded-full bg-yellow-400 flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_10px_red]">
+          <div className="mx-auto w-20 h-20 rounded-full bg-yellow-400 flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_10px_yellow]">
             <img
               src="https://res.cloudinary.com/dtwa3lxdk/image/upload/v1756897359/465660711_1763361547537323_2674934284076407223_n_prlt48.jpg"
               alt="Logo"

@@ -81,6 +81,7 @@ export default function Navbar() {
     { label: "تواصل معنا", type: "scroll", value: "contact" },
     { label: "من نحن", type: "scroll", value: "about", basePath: "/about" },
     { label: "الموقع", type: "scroll", value: "location", basePath: "/about" },
+    { label: "قيّم طعامنا", type: "path", value: "/rating" },
   ];
 
   // Navigation items for admins
@@ -91,6 +92,7 @@ export default function Navbar() {
     { label: "إدارة الفيديوهات", path: "/admin/videos" },
     { label: "إدارة القائمة", path: "/admin/menu" },
     { label: "إدارة الرسائل", path: "/admin/contact" },
+    { label: "إدارة التقييمات", path: "/admin/rating" },
     { label: "النشرة الإخبارية", path: "/admin/newsletter" },
     { label: "أوقات العمل", path: "/admin/working-times" },
     { label: "إدارة الطلبات", path: "/admin/orders" },
@@ -106,6 +108,7 @@ export default function Navbar() {
     { label: "إدارة الفيديوهات", path: "/admin/videos" },
     { label: "إدارة القائمة", path: "/admin/menu" },
     { label: "إدارة الرسائل", path: "/admin/contact" },
+    { label: "إدارة التقييمات", path: "/admin/rating" },
     { label: "النشرة الإخبارية", path: "/admin/newsletter" },
     { label: "أوقات العمل", path: "/admin/working-times" },
     { label: "إدارة الطلبات", path: "/admin/orders" },
